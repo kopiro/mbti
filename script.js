@@ -84,12 +84,12 @@ const mbtiTypes = {
       "Efficient and organized individuals who enjoy structure and order. ESTJs are often practical and reliable, excelling in tasks that require planning and implementation. They are responsible, decisive, and value tradition.",
   },
   ESFJ: {
-    functions: ["Fe", "Si", "Ne", "Ti", "Te", "Se", "Ni", "Fi"],
+    functions: ["Fe", "Si", "Ne", "Ti", "Fi", "Se", "Ni", "Te"],
     description:
       "Sociable and caring individuals who thrive in supportive and harmonious environments. ESFJs are often empathetic and nurturing, prioritizing the well-being of others. They are responsible, loyal, and enjoy building strong connections with people.",
   },
   ENFJ: {
-    functions: ["Fe", "Ni", "Se", "Ti", "Te", "Si", "Ne", "Fi"],
+    functions: ["Fe", "Ni", "Se", "Ti", "Fi", "Ne", "Si", "Te"],
     description:
       "Charismatic and compassionate individuals who are driven by a vision for a better future. ENFJs are often insightful and supportive, inspiring others to achieve their potential. They are empathetic, strategic, and enjoy making a positive impact on their communities.",
   },
@@ -100,12 +100,23 @@ const mbtiTypes = {
   },
 };
 
+function calculateTypeFromStack(primary, secondary) {
+  const [pFn, pExt] = primary.split("");
+  const [sFn, sExt] = secondary.split("");
+  const judgFn = ["T", "F"].includes(pFn) ? pFn : sFn;
+  const percFn = ["S", "N"].includes(pFn) ? pFn : sFn;
+  const jp =
+    (pExt === "e" && ["T", "F"].includes(pFn)) ||
+    (sExt === "e" && ["T", "F"].includes(sFn))
+      ? "J"
+      : "P";
+  return [pExt, percFn, judgFn, jp].join("").toUpperCase();
+}
+
 function createCognFunctions() {
   for (let i = 0; i < 4; i++) {
     const $func = document.createElement("div");
     $func.classList.add("cf");
-
-    const $wrap = document.createElement("div");
 
     const $spanwrap = document.createElement("div");
     const $span1 = document.createElement("span");
@@ -183,7 +194,7 @@ function changeActiveType($nextType) {
   );
 
   // Get typedesc of active type
-  const scrollBy = (oldIndex < $nextType.dataset.index ? -1 : 1) * 300;
+  const scrollBy = (Number($nextType.dataset.index) > oldIndex ? -1 : 1) * 300;
   const $activeTypeDesc = document.querySelector(
     `.typedesc[data-type="${oldType}"]`
   );
@@ -191,7 +202,6 @@ function changeActiveType($nextType) {
   const $nextTypeDesc = document.querySelector(
     `.typedesc[data-type="${$nextType.dataset.type}"]`
   );
-  $activeTypeDesc.classList.remove("active");
   $activeTypeDesc.animate(
     {
       translate: [`0 0`, `0 ${scrollBy}px`],
@@ -199,10 +209,8 @@ function changeActiveType($nextType) {
     {
       duration: SCROLL_DURATION,
       easing: "ease-out",
-      fill: "forwards",
     }
   );
-  $nextTypeDesc.classList.add("active");
   $nextTypeDesc.animate(
     {
       translate: [`0 ${-scrollBy}px`, `0 0`],
@@ -210,9 +218,10 @@ function changeActiveType($nextType) {
     {
       duration: SCROLL_DURATION,
       easing: "ease-out",
-      fill: "forwards",
     }
   );
+  $activeTypeDesc.classList.remove("active");
+  $nextTypeDesc.classList.add("active");
 
   const cognitiveFunctions = mbtiTypes[$nextType.dataset.type].functions;
   // Populate cognitive functions
@@ -278,11 +287,22 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
+$cfs.addEventListener("click", (e) => {
+  if (e.target.classList.contains("cfb")) {
+    const newPrimary = document.querySelector(`[data-cf-index="4"]`).innerText;
+    const newSecondary =
+      document.querySelector(`[data-cf-index="5"]`).innerText;
+    const newType = calculateTypeFromStack(newPrimary, newSecondary);
+    console.log("newPrimary, newSecondary :>> ", newPrimary, newSecondary);
+    const $nextType = document.querySelector(`.type[data-type="${newType}"]`);
+    changeActiveType($nextType);
+  }
+});
+
 createMBTITypes();
 createCognFunctions();
 
 // On Load - random type
-const types = document.querySelectorAll(".type");
-const $randomType = types[Math.floor(Math.random() * types.length)];
-
+const $randomType =
+  $types.children[Math.floor(Math.random() * $types.children.length)];
 changeActiveType($randomType);

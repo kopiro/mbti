@@ -132,6 +132,11 @@ body {
   margin-top: 36px;
   height: 120px;
   line-height: 120px;
+  cursor: pointer;
+}
+
+.cfb:hover {
+  opacity: 0.6;
 }
 
 .cfdesc {
