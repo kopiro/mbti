@@ -106,34 +106,47 @@ function calculateTypeFromStack(primary, secondary) {
   const judgFn = ["T", "F"].includes(pFn) ? pFn : sFn;
   const percFn = ["S", "N"].includes(pFn) ? pFn : sFn;
   const jp =
-    (pExt === "e" && ["T", "F"].includes(pFn)) ||
-    (sExt === "e" && ["T", "F"].includes(sFn))
+    (pExt === "e" && getJP(pFn) === "J") || (sExt === "e" && getJP(sFn) === "J")
       ? "J"
       : "P";
   return [pExt, percFn, judgFn, jp].join("").toUpperCase();
 }
 
+function getJP(cf) {
+  return ["T", "F"].includes(cf.substr(0, 1)) ? "J" : "P";
+}
+
 function createCognFunctions() {
   for (let i = 0; i < 4; i++) {
     const $func = document.createElement("div");
+    $func.setAttribute("draggable", true);
+    $func.setAttribute("data-position", i);
     $func.classList.add("cf");
 
     const $spanwrap = document.createElement("div");
+    $spanwrap.setAttribute("draggable", false);
+
     const $span1 = document.createElement("span");
     $span1.setAttribute("data-cf-index", i);
     $span1.classList.add("cfa");
+    $span1.setAttribute("draggable", false);
     $spanwrap.appendChild($span1);
 
     const $span2 = document.createElement("span");
     $span2.setAttribute("data-cf-index", i + 4);
     $span2.classList.add("cfb");
+    $span2.setAttribute("draggable", false);
     $spanwrap.appendChild($span2);
+
+    $func.appendChild($spanwrap);
 
     const $desc = document.createElement("div");
     $desc.classList.add("cfdesc");
-    $spanwrap.appendChild($desc);
+    $desc.setAttribute("draggable", false);
 
-    $cfs.appendChild($spanwrap);
+    $func.appendChild($desc);
+
+    $cfs.appendChild($func);
 
     $cfsByIndex[i] = $span1;
     $cfsByIndex[i + 4] = $span2;
@@ -228,6 +241,14 @@ function changeActiveType($nextType) {
   cognitiveFunctions.forEach((func, index) => {
     $cfsByIndex[index].innerText = func;
     if (index <= 3) {
+      $cfsByIndex[index].parentElement.parentElement.setAttribute(
+        "data-cf",
+        func
+      );
+      $cfsByIndex[index].parentElement.parentElement.setAttribute(
+        "data-jp",
+        ["T", "F"].includes(func.substr(0, 1)) ? "J" : "P"
+      );
       $cfsDescByIndex[index].innerText = cognFuncNames[func];
     }
   });
@@ -288,12 +309,11 @@ window.addEventListener("keydown", (e) => {
 });
 
 $cfs.addEventListener("click", (e) => {
-  if (e.target.classList.contains("cfb")) {
+  if (e.target.dataset.cf) {
     const newPrimary = document.querySelector(`[data-cf-index="4"]`).innerText;
     const newSecondary =
       document.querySelector(`[data-cf-index="5"]`).innerText;
     const newType = calculateTypeFromStack(newPrimary, newSecondary);
-    console.log("newPrimary, newSecondary :>> ", newPrimary, newSecondary);
     const $nextType = document.querySelector(`.type[data-type="${newType}"]`);
     changeActiveType($nextType);
   }
@@ -301,6 +321,84 @@ $cfs.addEventListener("click", (e) => {
 
 createMBTITypes();
 createCognFunctions();
+
+const $cfDraggable = $cfs.querySelectorAll("[draggable]");
+$cfDraggable.forEach(($cf) => {
+  $cf.addEventListener("dragstart", (e) => {
+    e.target.classList.add("dragging");
+
+    const incomingFn = e.target.dataset.cf;
+    const incomingIdx = Number(e.target.dataset.position);
+    const incomingJp = getJP(incomingFn);
+
+    // Set data JSON
+    e.dataTransfer.setData(
+      "text/plain",
+      JSON.stringify({
+        incomingFn,
+        incomingIdx,
+        incomingJp,
+      })
+    );
+
+    $cfs
+      .querySelectorAll(`[draggable][data-jp="${incomingJp}"]`)
+      .forEach(($scf) => {
+        if ($scf === e.target) return;
+        $scf.classList.add("droppable");
+      });
+  });
+
+  $cf.addEventListener("dragend", (e) => {
+    e.target.classList.remove("dragging");
+    $cfDraggable.forEach(($scf) => {
+      $scf.classList.remove("droppable");
+      $scf.classList.remove("over");
+    });
+  });
+
+  $cf.addEventListener("dragenter", (e) => {
+    if (!e.target.classList.contains("droppable")) return;
+    e.target.classList.add("over");
+  });
+
+  $cf.addEventListener("dragleave", (e) => {
+    if (!e.target.classList.contains("droppable")) return;
+    e.target.classList.remove("over");
+  });
+
+  $cf.addEventListener("dragover", (e) => {
+    e.preventDefault();
+  });
+
+  $cf.addEventListener("drop", (e) => {
+    e.stopPropagation(); // stops the browser from redirecting.
+    if (!e.target.classList.contains("droppable")) return;
+
+    const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+    const { incomingFn, incomingIdx, incomingJp } = data;
+
+    const dropIndex = Number(e.target.dataset.position);
+
+    const currentType = [
+      $cfsByIndex[0].innerText,
+      $cfsByIndex[1].innerText,
+      $cfsByIndex[2].innerText,
+      $cfsByIndex[3].innerText,
+    ];
+
+    console.log("dropIndex, incomingIdx :>> ", dropIndex, incomingIdx);
+
+    currentType[dropIndex] = incomingFn;
+    currentType[incomingIdx] = e.target.dataset.cf;
+
+    console.log("currentType :>> ", currentType);
+
+    const newType = calculateTypeFromStack(currentType[0], currentType[1]);
+    const $nextType = document.querySelector(`.type[data-type="${newType}"]`);
+    changeActiveType($nextType);
+  });
+});
 
 // On Load - random type
 const $randomType =

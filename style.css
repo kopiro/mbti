@@ -112,9 +112,12 @@ body {
 }
 
 .cf {
-  display: flex;
-  align-items: start;
-  position: relative;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.cf * {
+  pointer-events: none;
 }
 
 .cfa {
@@ -135,7 +138,7 @@ body {
   cursor: pointer;
 }
 
-.cfb:hover {
+.cf:hover .cfb {
   opacity: 0.6;
 }
 
@@ -144,4 +147,39 @@ body {
   color: var(--secondary-color);
   font-weight: 400;
   font-size: 30px;
+}
+
+@keyframes shake {
+  0% {
+    translate: 0 0;
+  }
+  25% {
+    translate: -5px 0;
+  }
+  50% {
+    transform: 0 0;
+  }
+  75% {
+    transform: 5px 0;
+  }
+  100% {
+    transform: 0 0;
+  }
+}
+
+.cf.dragging {
+  opacity: 0.2;
+}
+
+.cf.droppable {
+  opacity: 0.6;
+  animation: shake 0.3s ease-in-out infinite;
+}
+
+.cf.droppable > * {
+  transition: translate 0.15s ease-out;
+}
+
+.cf.droppable.over > * {
+  translate: 100px 0;
 }
