@@ -196,7 +196,7 @@ function changeActiveType($nextType) {
   $activeType.classList.remove("active");
   $nextType.classList.add("active");
 
-  // // Move y of $types to show active type
+  // Move y of $types to show active type
   $types.animate(
     {
       translate: [
@@ -253,7 +253,7 @@ function changeActiveType($nextType) {
       );
       $cfsByIndex[index].parentElement.parentElement.setAttribute(
         "data-jp",
-        ["T", "F"].includes(text.substr(0, 1)) ? "J" : "P"
+        getJP(text)
       );
       $cfsDescByIndex[index].innerText = cognFuncNames[text];
     }
@@ -451,8 +451,6 @@ $cfs.addEventListener("drop", (e) => {
     $cfsByIndex[3].innerText,
   ];
 
-  console.log("currentType :>> ", currentType);
-
   currentType[dropIndex] = incomingCf;
   currentType[incomingIdx] = e.target.dataset.cf;
 
@@ -462,6 +460,4 @@ $cfs.addEventListener("drop", (e) => {
 });
 
 // On Load - random type
-const $randomType =
-  $types.children[Math.floor(Math.random() * $types.children.length)];
-changeActiveType($randomType);
+changeActiveType(getNodeTypeFromString("ENFP"));
