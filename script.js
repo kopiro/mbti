@@ -117,6 +117,8 @@ function getJP(cf) {
 }
 
 function createCognFunctions() {
+  $cfs.innerHTML = "";
+
   for (let i = 0; i < 4; i++) {
     const $func = document.createElement("div");
     $func.setAttribute("draggable", true);
@@ -124,25 +126,22 @@ function createCognFunctions() {
     $func.classList.add("cf");
 
     const $spanwrap = document.createElement("div");
-    $spanwrap.setAttribute("draggable", false);
+    $spanwrap.classList.add("cfspanwrap");
 
     const $span1 = document.createElement("span");
     $span1.setAttribute("data-cf-index", i);
     $span1.classList.add("cfa");
-    $span1.setAttribute("draggable", false);
     $spanwrap.appendChild($span1);
 
     const $span2 = document.createElement("span");
     $span2.setAttribute("data-cf-index", i + 4);
     $span2.classList.add("cfb");
-    $span2.setAttribute("draggable", false);
     $spanwrap.appendChild($span2);
 
     $func.appendChild($spanwrap);
 
     const $desc = document.createElement("div");
     $desc.classList.add("cfdesc");
-    $desc.setAttribute("draggable", false);
 
     $func.appendChild($desc);
 
@@ -157,7 +156,7 @@ function createCognFunctions() {
 function createMBTITypes() {
   // Create a div for each type in $types
   let index = 0;
-  for (const type in mbtiTypes) {
+  for (const type of Object.keys(mbtiTypes)) {
     const $type = document.createElement("div");
     $type.setAttribute("data-type", type);
     $type.setAttribute("data-index", index++);
@@ -173,25 +172,31 @@ function createMBTITypes() {
   }
 }
 
-function getActiveType() {
+function getNodeTypeActive() {
   return (
     document.querySelector(".type.active") || document.querySelector(".type")
   );
 }
 
+function getNodeTypeFromString(typeStr) {
+  return document.querySelector(`.type[data-type="${typeStr}"]`);
+}
+
 function changeActiveType($nextType) {
   if (!$nextType) return;
 
-  const $activeType = getActiveType();
+  const $activeType = getNodeTypeActive();
   if ($nextType === $activeType) return;
 
   const oldType = $activeType.dataset.type;
   const oldIndex = $activeType.dataset.index;
 
+  const newType = $nextType.dataset.type;
+
   $activeType.classList.remove("active");
   $nextType.classList.add("active");
 
-  // Move y of $types to show active type
+  // // Move y of $types to show active type
   $types.animate(
     {
       translate: [
@@ -207,13 +212,13 @@ function changeActiveType($nextType) {
   );
 
   // Get typedesc of active type
-  const scrollBy = (Number($nextType.dataset.index) > oldIndex ? -1 : 1) * 300;
+  const scrollBy = (Number($nextType.dataset.index) > oldIndex ? -1 : 1) * 500;
   const $activeTypeDesc = document.querySelector(
     `.typedesc[data-type="${oldType}"]`
   );
   // Find new $typesdesc to show active type
   const $nextTypeDesc = document.querySelector(
-    `.typedesc[data-type="${$nextType.dataset.type}"]`
+    `.typedesc[data-type="${newType}"]`
   );
   $activeTypeDesc.animate(
     {
@@ -236,41 +241,36 @@ function changeActiveType($nextType) {
   $activeTypeDesc.classList.remove("active");
   $nextTypeDesc.classList.add("active");
 
-  const cognitiveFunctions = mbtiTypes[$nextType.dataset.type].functions;
+  const cognitiveFunctions = mbtiTypes[newType].functions;
   // Populate cognitive functions
-  cognitiveFunctions.forEach((func, index) => {
-    $cfsByIndex[index].innerText = func;
+  cognitiveFunctions.forEach((text, index) => {
+    $cfsByIndex[index].innerText = text;
+
     if (index <= 3) {
       $cfsByIndex[index].parentElement.parentElement.setAttribute(
         "data-cf",
-        func
+        text
       );
       $cfsByIndex[index].parentElement.parentElement.setAttribute(
         "data-jp",
-        ["T", "F"].includes(func.substr(0, 1)) ? "J" : "P"
+        ["T", "F"].includes(text.substr(0, 1)) ? "J" : "P"
       );
-      $cfsDescByIndex[index].innerText = cognFuncNames[func];
+      $cfsDescByIndex[index].innerText = cognFuncNames[text];
     }
   });
 }
 
-$types.addEventListener("click", (e) => {
-  if (e.target.classList.contains("type")) {
-    changeActiveType(e.target);
-  }
-});
+function onMouseWheel(e) {
+  const $activeType = getNodeTypeActive();
+  const $nextType =
+    e.deltaY > 0
+      ? $activeType.nextElementSibling
+      : $activeType.previousElementSibling;
+  changeActiveType($nextType);
+}
 
 // Change active type
-document.body.addEventListener("mousewheel", (e) => {
-  if (e.deltaY !== 0) {
-    const $activeType = getActiveType();
-    const $nextType =
-      e.deltaY > 0
-        ? $activeType.nextElementSibling
-        : $activeType.previousElementSibling;
-    changeActiveType($nextType);
-  }
-});
+document.body.addEventListener("mousewheel", onMouseWheel);
 
 const keyPressesToCharIndex = {
   e: 0,
@@ -283,9 +283,15 @@ const keyPressesToCharIndex = {
   p: 3,
 };
 
+$types.addEventListener("click", (e) => {
+  if (e.target.dataset.type) {
+    changeActiveType(e.target);
+  }
+});
+
 window.addEventListener("keydown", (e) => {
   if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-    const $activeType = getActiveType();
+    const $activeType = getNodeTypeActive();
     const $nextType =
       e.key === "ArrowDown"
         ? $activeType.nextElementSibling
@@ -296,8 +302,9 @@ window.addEventListener("keydown", (e) => {
 
   const changeTypeIndex = keyPressesToCharIndex[e.key];
   if (changeTypeIndex !== undefined) {
-    const $activeType = getActiveType();
+    const $activeType = getNodeTypeActive();
     const activeTypeStrArr = $activeType.dataset.type.split("");
+    console.log("activeTypeStrArr :>> ", activeTypeStrArr);
     activeTypeStrArr[changeTypeIndex] = e.key.toUpperCase();
     // Find type with new string
     const newTypeStr = activeTypeStrArr.join("");
@@ -308,96 +315,154 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
+const SWAP_DURATION = 500;
+
 $cfs.addEventListener("click", (e) => {
   if (e.target.dataset.cf) {
-    const newPrimary = document.querySelector(`[data-cf-index="4"]`).innerText;
-    const newSecondary =
-      document.querySelector(`[data-cf-index="5"]`).innerText;
-    const newType = calculateTypeFromStack(newPrimary, newSecondary);
-    const $nextType = document.querySelector(`.type[data-type="${newType}"]`);
-    changeActiveType($nextType);
+    for (let i = 0; i < 4; i++) {
+      // Animate the two cf
+      const $leftCf = $cfs.children[i].querySelector(".cfspanwrap").children[0];
+      const $rightCf =
+        $cfs.children[i].querySelector(".cfspanwrap").children[1];
+
+      const leftCfWidth = $leftCf.offsetWidth;
+
+      // Clone leftCf, change text and modify class to .cfb
+      const $leftCfClone = $leftCf.cloneNode(true);
+      $leftCfClone.innerText = $rightCf.innerText;
+      $leftCfClone.setAttribute("class", "cfa");
+      $leftCfClone.setAttribute("data-cloned", true);
+      $leftCfClone.style.opacity = 0;
+      $leftCfClone.style.position = "absolute";
+      $leftCf.parentElement.appendChild($leftCfClone);
+      const widthOfLeftCf = $leftCfClone.offsetWidth;
+      $leftCf.parentElement.removeChild($leftCfClone);
+
+      $leftCf.style.position = "absolute";
+      $leftCf.style.left = 0;
+
+      $rightCf.style.position = "absolute";
+      $rightCf.style.left = `${leftCfWidth + 20}px`;
+      $leftCf.style.bottom = `22px`;
+
+      $leftCf.setAttribute("class", "cfb");
+      $rightCf.setAttribute("class", "cfa");
+
+      const leftFinalValue = widthOfLeftCf + 20;
+      $leftCf.animate(
+        {
+          translate: [`0 0`, `${leftFinalValue}px 0`],
+        },
+        {
+          duration: SWAP_DURATION,
+          easing: "ease-out",
+          fill: "forwards",
+        }
+      );
+
+      const rightFinalValue = -(leftCfWidth + 20);
+      $rightCf.animate(
+        {
+          translate: [`0 0`, `${rightFinalValue}px 0`],
+        },
+        {
+          duration: SWAP_DURATION,
+          easing: "ease-out",
+          fill: "forwards",
+        }
+      );
+    }
+
+    setTimeout(() => {
+      const newPrimary =
+        document.querySelector(`[data-cf-index="4"]`).innerText;
+      const newSecondary =
+        document.querySelector(`[data-cf-index="5"]`).innerText;
+
+      createCognFunctions();
+
+      const newType = calculateTypeFromStack(newPrimary, newSecondary);
+      const $nextType = getNodeTypeFromString(newType);
+
+      changeActiveType($nextType);
+    }, SWAP_DURATION);
   }
 });
 
 createMBTITypes();
 createCognFunctions();
 
-const $cfDraggable = $cfs.querySelectorAll("[draggable]");
-$cfDraggable.forEach(($cf) => {
-  $cf.addEventListener("dragstart", (e) => {
-    e.target.classList.add("dragging");
+$cfs.addEventListener("dragstart", (e) => {
+  e.target.classList.add("dragging");
 
-    const incomingFn = e.target.dataset.cf;
-    const incomingIdx = Number(e.target.dataset.position);
-    const incomingJp = getJP(incomingFn);
+  const incomingCf = e.target.dataset.cf;
+  const incomingIdx = Number(e.target.dataset.position);
+  const incomingJp = getJP(incomingCf);
 
-    // Set data JSON
-    e.dataTransfer.setData(
-      "text/plain",
-      JSON.stringify({
-        incomingFn,
-        incomingIdx,
-        incomingJp,
-      })
-    );
+  // Set data JSON
+  e.dataTransfer.setData(
+    "text/plain",
+    JSON.stringify({
+      incomingCf,
+      incomingIdx,
+      incomingJp,
+    })
+  );
 
-    $cfs
-      .querySelectorAll(`[draggable][data-jp="${incomingJp}"]`)
-      .forEach(($scf) => {
-        if ($scf === e.target) return;
-        $scf.classList.add("droppable");
-      });
-  });
-
-  $cf.addEventListener("dragend", (e) => {
-    e.target.classList.remove("dragging");
-    $cfDraggable.forEach(($scf) => {
-      $scf.classList.remove("droppable");
-      $scf.classList.remove("over");
+  $cfs
+    .querySelectorAll(`[draggable][data-jp="${incomingJp}"]`)
+    .forEach(($scf) => {
+      if ($scf === e.target) return;
+      $scf.classList.add("droppable");
     });
+});
+
+$cfs.addEventListener("dragend", (e) => {
+  e.target.classList.remove("dragging");
+  Array.from($cfs.children).forEach(($scf) => {
+    $scf.classList.remove("droppable");
+    $scf.classList.remove("over");
   });
+});
 
-  $cf.addEventListener("dragenter", (e) => {
-    if (!e.target.classList.contains("droppable")) return;
-    e.target.classList.add("over");
-  });
+$cfs.addEventListener("dragenter", (e) => {
+  if (!e.target.classList.contains("droppable")) return;
+  e.target.classList.add("over");
+});
 
-  $cf.addEventListener("dragleave", (e) => {
-    if (!e.target.classList.contains("droppable")) return;
-    e.target.classList.remove("over");
-  });
+$cfs.addEventListener("dragleave", (e) => {
+  if (!e.target.classList.contains("droppable")) return;
+  e.target.classList.remove("over");
+});
 
-  $cf.addEventListener("dragover", (e) => {
-    e.preventDefault();
-  });
+$cfs.addEventListener("dragover", (e) => {
+  e.preventDefault();
+});
 
-  $cf.addEventListener("drop", (e) => {
-    e.stopPropagation(); // stops the browser from redirecting.
-    if (!e.target.classList.contains("droppable")) return;
+$cfs.addEventListener("drop", (e) => {
+  e.stopPropagation(); // stops the browser from redirecting.
+  if (!e.target.classList.contains("droppable")) return;
 
-    const data = JSON.parse(e.dataTransfer.getData("text/plain"));
-    const { incomingFn, incomingIdx, incomingJp } = data;
+  const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+  const { incomingCf, incomingIdx, incomingJp } = data;
 
-    const dropIndex = Number(e.target.dataset.position);
+  const dropIndex = Number(e.target.dataset.position);
 
-    const currentType = [
-      $cfsByIndex[0].innerText,
-      $cfsByIndex[1].innerText,
-      $cfsByIndex[2].innerText,
-      $cfsByIndex[3].innerText,
-    ];
+  const currentType = [
+    $cfsByIndex[0].innerText,
+    $cfsByIndex[1].innerText,
+    $cfsByIndex[2].innerText,
+    $cfsByIndex[3].innerText,
+  ];
 
-    console.log("dropIndex, incomingIdx :>> ", dropIndex, incomingIdx);
+  console.log("currentType :>> ", currentType);
 
-    currentType[dropIndex] = incomingFn;
-    currentType[incomingIdx] = e.target.dataset.cf;
+  currentType[dropIndex] = incomingCf;
+  currentType[incomingIdx] = e.target.dataset.cf;
 
-    console.log("currentType :>> ", currentType);
-
-    const newType = calculateTypeFromStack(currentType[0], currentType[1]);
-    const $nextType = document.querySelector(`.type[data-type="${newType}"]`);
-    changeActiveType($nextType);
-  });
+  const newType = calculateTypeFromStack(currentType[0], currentType[1]);
+  const $nextType = getNodeTypeFromString(newType);
+  changeActiveType($nextType);
 });
 
 // On Load - random type

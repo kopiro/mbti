@@ -48,7 +48,7 @@ body {
   height: var(--type-height);
   line-height: var(--type-height);
   font-style: italic;
-  transition: translate 0.3s ease-out, font-size 0.8s ease-out;
+  transition: translate 0.5s ease-out, font-size 0.8s ease-out;
 }
 
 .type:hover {
@@ -60,10 +60,10 @@ body {
   color: var(--primary-color);
   font-weight: 900;
   font-size: var(--type-active-height);
+  font-style: normal;
   height: var(--type-active-height);
   line-height: var(--type-active-height);
   translate: 50px;
-  font-style: normal;
 }
 
 .type.active:hover {
@@ -109,15 +109,32 @@ body {
   top: 50%;
   translate: 0 -50%;
   gap: 50px;
+  width: 400px;
 }
 
 .cf {
   border: 1px solid transparent;
   cursor: pointer;
+  width: 400px;
+}
+
+.cfspanwrap {
+  width: 400px;
+  height: 140px;
+  position: relative;
 }
 
 .cf * {
   pointer-events: none;
+}
+
+.cfspanwrap > * {
+  transition: font-size 0.5s ease-out;
+  cursor: pointer;
+  display: inline-block;
+  transform-origin: 0 100%;
+  position: relative;
+  line-height: 1em;
 }
 
 .cfa {
@@ -132,14 +149,10 @@ body {
   font-size: 80px;
   font-style: italic;
   color: var(--secondary-color);
-  margin-top: 36px;
-  height: 120px;
-  line-height: 120px;
-  cursor: pointer;
 }
 
 .cf:hover .cfb {
-  opacity: 0.6;
+  opacity: 0.4;
 }
 
 .cfdesc {
@@ -173,7 +186,7 @@ body {
 
 .cf.droppable {
   opacity: 0.6;
-  animation: shake 0.3s ease-in-out infinite;
+  animation: shake 0.2s ease-in-out infinite;
 }
 
 .cf.droppable > * {
