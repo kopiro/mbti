@@ -159,6 +159,8 @@ function changeActiveType($nextType) {
   if (!$nextType) return;
 
   const $activeType = getActiveType();
+  if ($nextType === $activeType) return;
+
   const oldType = $activeType.dataset.type;
   const oldIndex = $activeType.dataset.index;
 
@@ -240,6 +242,17 @@ document.body.addEventListener("mousewheel", (e) => {
   }
 });
 
+const keyPressesToCharIndex = {
+  e: 0,
+  i: 0,
+  s: 1,
+  n: 1,
+  t: 2,
+  f: 2,
+  j: 3,
+  p: 3,
+};
+
 window.addEventListener("keydown", (e) => {
   if (e.key === "ArrowDown" || e.key === "ArrowUp") {
     const $activeType = getActiveType();
@@ -247,6 +260,20 @@ window.addEventListener("keydown", (e) => {
       e.key === "ArrowDown"
         ? $activeType.nextElementSibling
         : $activeType.previousElementSibling;
+    changeActiveType($nextType);
+    return;
+  }
+
+  const changeTypeIndex = keyPressesToCharIndex[e.key];
+  if (changeTypeIndex !== undefined) {
+    const $activeType = getActiveType();
+    const activeTypeStrArr = $activeType.dataset.type.split("");
+    activeTypeStrArr[changeTypeIndex] = e.key.toUpperCase();
+    // Find type with new string
+    const newTypeStr = activeTypeStrArr.join("");
+    const $nextType = document.querySelector(
+      `.type[data-type="${newTypeStr}"]`
+    );
     changeActiveType($nextType);
   }
 });
