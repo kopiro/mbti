@@ -1,0 +1,64 @@
+@font-face {
+  font-family: Caprasimo;
+  src: url(./Caprasimo-Regular.ttf);
+}
+
+body,
+input {
+  font-family: Caprasimo, sans-serif;
+  font-size: 16px;
+}
+
+body {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(72, 190, 13);
+  color: #000;
+}
+
+input {
+  background-color: transparent;
+  color: #000;
+  border: 1px solid #eee;
+}
+
+/* center vertically and horizontally */
+#body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: auto;
+}
+
+#type {
+  font-size: 300px;
+  letter-spacing: 30px;
+  outline: none;
+  margin: 0 auto;
+  display: block;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+#result {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  gap: 50px;
+  height: 200px;
+  color: white;
+}
+
+#result > * {
+  margin: 0 auto;
+  display: block;
+  text-align: center;
+  font-size: 100px;
+  width: 150px;
+  text-align: center;
+}
