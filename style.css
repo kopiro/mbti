@@ -1,6 +1,9 @@
 html {
   --type-height: 130px;
   --type-active-height: 280px;
+  --bg-color: #fcf6e6;
+  --primary-color: #1a1919;
+  --secondary-color: #b8b3a7;
 }
 
 body,
@@ -9,10 +12,10 @@ input {
 }
 
 body {
-  height: 100vh;
   width: 100vw;
-  background-color: #fcf6e6;
-  color: #1a1919;
+  height: 100vh;
+  background-color: var(--bg-color);
+  color: var(--primary-color);
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
   position: fixed;
@@ -21,6 +24,7 @@ body {
   bottom: 0;
   right: 0;
   margin: 0;
+  -webkit-user-select: none;
 }
 
 #types {
@@ -33,12 +37,13 @@ body {
   top: 50%;
   left: 50px;
   margin-top: -140px;
-  gap: 0px;
+  z-index: 0;
+  gap: 40px;
 }
 
 .type {
   font-weight: 100;
-  color: #b8b3a7;
+  color: var(--secondary-color);
   font-size: var(--type-height);
   height: var(--type-height);
   line-height: var(--type-height);
@@ -46,8 +51,13 @@ body {
   transition: translate 0.3s ease-out, font-size 0.8s ease-out;
 }
 
+.type:hover {
+  cursor: pointer;
+  opacity: 0.6;
+}
+
 .type.active {
-  color: #1a1919;
+  color: var(--primary-color);
   font-weight: 900;
   font-size: var(--type-active-height);
   height: var(--type-active-height);
@@ -56,13 +66,14 @@ body {
   font-style: normal;
 }
 
-#typesdesc {
-  font-family: "Georgia", serif;
-  color: #1a1919;
+.type.active:hover {
+  opacity: 1;
+  cursor: normal;
 }
 
-.typedesc {
-  opacity: 0;
+#typesdesc {
+  font-family: "Georgia", serif;
+  color: var(--primary-color);
   position: absolute;
   top: 50%;
   left: 400px;
@@ -70,8 +81,18 @@ body {
   line-height: 1.3em;
   text-align: left;
   width: 600px;
+  height: 300px;
+  z-index: 1;
+}
+
+.typedesc {
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
   margin-top: calc(var(--type-active-height) / 2);
   transition: opacity 0.5s ease-in;
+  -webkit-user-select: initial !important;
 }
 
 .typedesc.active {
@@ -81,13 +102,13 @@ body {
 
 #cfs {
   position: absolute;
-  top: 100px;
   right: 100px;
-  bottom: 100px;
-  width: 300px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  top: 50%;
+  translate: 0 -50%;
+  gap: 50px;
 }
 
 .cf {
@@ -107,7 +128,7 @@ body {
   font-weight: 100;
   font-size: 80px;
   font-style: italic;
-  color: #b8b3a7;
+  color: var(--secondary-color);
   margin-top: 36px;
   height: 120px;
   line-height: 120px;
@@ -115,7 +136,7 @@ body {
 
 .cfdesc {
   font-family: "Georgia", serif;
-  color: #b8b3a7;
+  color: var(--secondary-color);
   font-weight: 400;
   font-size: 30px;
 }

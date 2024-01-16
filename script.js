@@ -132,13 +132,12 @@ function createCognFunctions() {
 
 function createMBTITypes() {
   // Create a div for each type in $types
+  let index = 0;
   for (const type in mbtiTypes) {
     const $type = document.createElement("div");
     $type.setAttribute("data-type", type);
+    $type.setAttribute("data-index", index++);
     $type.classList.add("type");
-    if (type === "INTJ") {
-      $type.classList.add("active");
-    }
     $type.innerText = type;
     $types.appendChild($type);
 
@@ -150,16 +149,22 @@ function createMBTITypes() {
   }
 }
 
-function changeActiveType(deltaY) {
-  const $activeType = document.querySelector(".type.active");
-  const $nextType =
-    deltaY > 0
-      ? $activeType.nextElementSibling
-      : $activeType.previousElementSibling;
-  if ($nextType) {
-    $activeType.classList.remove("active");
-    $nextType.classList.add("active");
-  }
+function getActiveType() {
+  return (
+    document.querySelector(".type.active") || document.querySelector(".type")
+  );
+}
+
+function changeActiveType($nextType) {
+  if (!$nextType) return;
+
+  const $activeType = getActiveType();
+  const oldType = $activeType.dataset.type;
+  const oldIndex = $activeType.dataset.index;
+
+  $activeType.classList.remove("active");
+  $nextType.classList.add("active");
+
   // Move y of $types to show active type
   $types.animate(
     {
@@ -176,9 +181,9 @@ function changeActiveType(deltaY) {
   );
 
   // Get typedesc of active type
-  const scrollBy = (deltaY > 0 ? -1 : 1) * 300;
+  const scrollBy = (oldIndex < $nextType.dataset.index ? -1 : 1) * 300;
   const $activeTypeDesc = document.querySelector(
-    `.typedesc[data-type="${$activeType.dataset.type}"]`
+    `.typedesc[data-type="${oldType}"]`
   );
   // Find new $typesdesc to show active type
   const $nextTypeDesc = document.querySelector(
@@ -217,18 +222,40 @@ function changeActiveType(deltaY) {
   });
 }
 
+$types.addEventListener("click", (e) => {
+  if (e.target.classList.contains("type")) {
+    changeActiveType(e.target);
+  }
+});
+
 // Change active type
-document.body.addEventListener("mousewheel", (e) => changeActiveType(e.deltaY));
+document.body.addEventListener("mousewheel", (e) => {
+  if (e.deltaY !== 0) {
+    const $activeType = getActiveType();
+    const $nextType =
+      e.deltaY > 0
+        ? $activeType.nextElementSibling
+        : $activeType.previousElementSibling;
+    changeActiveType($nextType);
+  }
+});
 
 window.addEventListener("keydown", (e) => {
-  if (e.key === "ArrowDown") changeActiveType(1);
-  if (e.key === "ArrowUp") changeActiveType(-1);
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    const $activeType = getActiveType();
+    const $nextType =
+      e.key === "ArrowDown"
+        ? $activeType.nextElementSibling
+        : $activeType.previousElementSibling;
+    changeActiveType($nextType);
+  }
 });
 
 createMBTITypes();
 createCognFunctions();
 
-// On Load
-window.addEventListener("load", () => {
-  changeActiveType(1);
-});
+// On Load - random type
+const types = document.querySelectorAll(".type");
+const $randomType = types[Math.floor(Math.random() * types.length)];
+
+changeActiveType($randomType);
