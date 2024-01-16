@@ -304,13 +304,9 @@ window.addEventListener("keydown", (e) => {
   if (changeTypeIndex !== undefined) {
     const $activeType = getNodeTypeActive();
     const activeTypeStrArr = $activeType.dataset.type.split("");
-    console.log("activeTypeStrArr :>> ", activeTypeStrArr);
     activeTypeStrArr[changeTypeIndex] = e.key.toUpperCase();
-    // Find type with new string
     const newTypeStr = activeTypeStrArr.join("");
-    const $nextType = document.querySelector(
-      `.type[data-type="${newTypeStr}"]`
-    );
+    const $nextType = getNodeTypeFromString(newTypeStr);
     changeActiveType($nextType);
   }
 });
