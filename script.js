@@ -230,7 +230,7 @@ function renderInfiniteScroll() {
 }
 
 function changeActiveType(nextType, forced = false) {
-  const $nextType = getNodeTypeFromString(nextType);
+  let $nextType = getNodeTypeFromString(nextType);
   if (!$nextType) {
     console.warn(`Type ${nextType} does not exist`);
     return;
@@ -242,15 +242,13 @@ function changeActiveType(nextType, forced = false) {
     return;
   }
 
-  const oldType = $activeType.dataset.type;
-  const oldIndex = $activeType.dataset.index;
-
-  const newType = $nextType.dataset.type;
-
   $activeType.classList.remove("active");
   $nextType.classList.add("active");
 
   renderInfiniteScroll();
+
+  const oldType = $activeType.dataset.type;
+  const oldIndex = $activeType.dataset.index;
 
   // Move y of $types to show active type
   $types.animate(
@@ -274,7 +272,7 @@ function changeActiveType(nextType, forced = false) {
   );
   // Find new $typesdesc to show active type
   const $nextTypeDesc = document.querySelector(
-    `.typedesc[data-type="${newType}"]`
+    `.typedesc[data-type="${nextType}"]`
   );
   $activeTypeDesc.animate(
     {
@@ -297,7 +295,7 @@ function changeActiveType(nextType, forced = false) {
   $activeTypeDesc.classList.remove("active");
   $nextTypeDesc.classList.add("active");
 
-  const cognitiveFunctions = mbtiTypes[newType].functions;
+  const cognitiveFunctions = mbtiTypes[nextType].functions;
   // Populate cognitive functions
   cognitiveFunctions.forEach((text, index) => {
     $cfsByIndex[index].innerText = text;
