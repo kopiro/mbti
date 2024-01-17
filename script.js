@@ -103,17 +103,41 @@ const mbtiTypes = {
 function calculateTypeFromStack(primary, secondary) {
   const [pFn, pExt] = primary.split("");
   const [sFn, sExt] = secondary.split("");
-  const judgFn = ["T", "F"].includes(pFn) ? pFn : sFn;
-  const percFn = ["S", "N"].includes(pFn) ? pFn : sFn;
+  const judgFn = getJP(pFn) === "J" ? pFn : getJP(sFn) === "J" ? sFn : null;
+  const percFn = getJP(pFn) === "P" ? pFn : getJP(sFn) === "P" ? sFn : null;
+  if (!judgFn || !percFn) {
+    console.warn("No judgFn or percFn", arguments);
+    return null;
+  }
+
   const jp =
     (pExt === "e" && getJP(pFn) === "J") || (sExt === "e" && getJP(sFn) === "J")
       ? "J"
-      : "P";
-  return [pExt, percFn, judgFn, jp].join("").toUpperCase();
+      : (pExt === "e" && getJP(pFn) === "P") ||
+        (sExt === "e" && getJP(sFn) === "P")
+      ? "P"
+      : null;
+  if (!jp) {
+    console.warn("No jp", arguments);
+    return null;
+  }
+
+  const type = [pExt, percFn, judgFn, jp].join("").toUpperCase();
+
+  if (!mbtiTypes[type]) {
+    console.warn(`Type ${type} does not exist`, arguments);
+    return null;
+  }
+
+  return type;
 }
 
 function getJP(cf) {
   return ["T", "F"].includes(cf.substr(0, 1)) ? "J" : "P";
+}
+
+function getExtraversion(cf) {
+  return cf.substr(1, 1);
 }
 
 function createCognFunctions() {
@@ -338,6 +362,12 @@ function throttle(fn) {
 // Change active type
 document.body.addEventListener("mousewheel", throttle(onMouseWheel));
 
+$types.addEventListener("click", (e) => {
+  if (e.target.dataset.type) {
+    changeActiveType(e.target.dataset.type);
+  }
+});
+
 const keyPressesToCharIndex = {
   e: 0,
   i: 0,
@@ -348,12 +378,6 @@ const keyPressesToCharIndex = {
   j: 3,
   p: 3,
 };
-
-$types.addEventListener("click", (e) => {
-  if (e.target.dataset.type) {
-    changeActiveType(e.target.dataset.type);
-  }
-});
 
 window.addEventListener("keydown", (e) => {
   if (e.key === "ArrowDown" || e.key === "ArrowUp") {
@@ -449,6 +473,69 @@ $cfs.addEventListener("click", (e) => {
   }
 });
 
+const mbtiOppositeCf = {
+  T: "F",
+  F: "T",
+  S: "N",
+  N: "S",
+};
+
+const mbtiOppositeExtraversion = {
+  e: "i",
+  i: "e",
+};
+
+const mbtiOppositeJP = {
+  J: "P",
+  P: "J",
+};
+
+function calculateNewTypeAfterSwap(inCf, dropIndex) {
+  const currentType = $cfsByIndex
+    .slice(0, 4)
+    .map((e) => e.innerText.substr(0, 1));
+  const newBuildType = [null, null, null, null];
+
+  // Remove incomingFn from currentType
+  currentType.splice(
+    currentType.findIndex((fn) => fn.substr(0, 1) === inCf.substr(0, 1)),
+    1
+  );
+
+  const inExt = getExtraversion(inCf);
+  const inOppExt = mbtiOppositeExtraversion[inExt];
+
+  const inJP = getJP(inCf);
+  const inOppJP = mbtiOppositeJP[inJP];
+  const inOppCf = mbtiOppositeCf[inCf.substr(0, 1)];
+
+  if (dropIndex === 0) {
+    newBuildType[0] = inCf;
+    newBuildType[1] =
+      currentType.find((fn) => getJP(fn) === inOppJP) + inOppExt;
+    // newBuildType[2] = mbtiOppositeCf[newBuildType[1].substr(0, 1)] + inExt;
+    // newBuildType[3] = inOppCf + inOppExt;
+  } else if (dropIndex === 1) {
+    newBuildType[0] =
+      currentType.find((fn) => getJP(fn) === inOppJP) + inOppExt;
+    newBuildType[1] = inCf;
+    // newBuildType[2] = inOppCf + inOppExt;
+    // newBuildType[3] = mbtiOppositeCf[newBuildType[0].substr(0, 1)] + inExt;
+  } else if (dropIndex === 2) {
+    newBuildType[0] = currentType.find((fn) => getJP(fn) === inOppJP) + inExt;
+    newBuildType[1] = inOppCf + inOppExt;
+    // newBuildType[2] = inCf;
+    // newBuildType[3] = mbtiOppositeCf[newBuildType[0].substr(0, 1)] + inOppExt;
+  } else if (dropIndex === 3) {
+    newBuildType[0] = inOppCf + inOppExt;
+    newBuildType[1] = currentType.find((fn) => getJP(fn) === inOppJP) + inExt;
+    // newBuildType[2] = mbtiOppositeCf[newBuildType[1].substr(0, 1)] + inOppExt;
+    // newBuildType[3] = inCf;
+  }
+
+  return calculateTypeFromStack(newBuildType[0], newBuildType[1]);
+}
+
 $cfs.addEventListener("dragstart", (e) => {
   e.target.classList.add("dragging");
 
@@ -466,12 +553,10 @@ $cfs.addEventListener("dragstart", (e) => {
     })
   );
 
-  $cfs
-    .querySelectorAll(`[draggable][data-jp="${incomingJp}"]`)
-    .forEach(($scf) => {
-      if ($scf === e.target) return;
-      $scf.classList.add("droppable");
-    });
+  $cfs.querySelectorAll(`[draggable]`).forEach(($scf) => {
+    if ($scf === e.target) return;
+    $scf.classList.add("droppable");
+  });
 });
 
 $cfs.addEventListener("dragend", (e) => {
@@ -497,25 +582,17 @@ $cfs.addEventListener("dragover", (e) => {
 });
 
 $cfs.addEventListener("drop", (e) => {
-  e.stopPropagation(); // stops the browser from redirecting.
+  e.stopPropagation();
   if (!e.target.classList.contains("droppable")) return;
 
   const data = JSON.parse(e.dataTransfer.getData("text/plain"));
-  const { incomingCf, incomingIdx, incomingJp } = data;
+  const { incomingCf, incomingIdx } = data;
 
-  const dropIndex = Number(e.target.dataset.position);
+  const newType = calculateNewTypeAfterSwap(
+    incomingCf,
+    Number(e.target.dataset.position)
+  );
 
-  const currentType = [
-    $cfsByIndex[0].innerText,
-    $cfsByIndex[1].innerText,
-    $cfsByIndex[2].innerText,
-    $cfsByIndex[3].innerText,
-  ];
-
-  currentType[dropIndex] = incomingCf;
-  currentType[incomingIdx] = e.target.dataset.cf;
-
-  const newType = calculateTypeFromStack(currentType[0], currentType[1]);
   setTimeout(() => {
     changeActiveType(newType);
   }, 100);
