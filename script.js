@@ -154,39 +154,97 @@ function createCognFunctions() {
 }
 
 function createMBTITypes() {
-  // Create a div for each type in $types
   let index = 0;
+
+  // Create a div for each type in $types
   for (const type of Object.keys(mbtiTypes)) {
     const $type = document.createElement("div");
     $type.setAttribute("data-type", type);
-    $type.setAttribute("data-index", index++);
+    $type.setAttribute("data-index", index);
     $type.classList.add("type");
+    if (type === "ENFP") {
+      $type.classList.add("active");
+    }
     $type.innerText = type;
     $types.appendChild($type);
 
     const $typedesc = document.createElement("div");
     $typedesc.setAttribute("data-type", type);
     $typedesc.classList.add("typedesc");
+    if (type === "ENFP") {
+      $typedesc.classList.add("active");
+    }
     $typedesc.innerText = mbtiTypes[type].description;
     $typesdesc.appendChild($typedesc);
+
+    ++index;
   }
 }
 
 function getNodeTypeActive() {
-  return (
-    document.querySelector(".type.active") || document.querySelector(".type")
-  );
+  return document.querySelector(".type.active");
 }
 
 function getNodeTypeFromString(typeStr) {
   return document.querySelector(`.type[data-type="${typeStr}"]`);
 }
 
-function changeActiveType($nextType) {
-  if (!$nextType) return;
+const DEPTH = 4;
+
+function renderInfiniteScroll() {
+  const $activeType = getNodeTypeActive();
+  if (!$activeType) {
+    console.warn("No active type");
+    return;
+  }
+
+  $prevType = $activeType;
+  $nextType = $activeType;
+
+  for (let i = 0; i < DEPTH; i++) {
+    $prevType = $prevType ? $prevType.previousElementSibling : null;
+    $nextType = $nextType ? $nextType.nextElementSibling : null;
+  }
+
+  console.log("prev, next", $prevType, $nextType);
+
+  if (!$nextType) {
+    for (let i = 0; i < DEPTH; i++) {
+      const $typeAt = $types.children[0];
+      const $clone = $typeAt.cloneNode(true);
+      $types.appendChild($clone);
+      $types.removeChild($typeAt);
+    }
+  }
+  if (!$prevType) {
+    for (let i = 0; i < DEPTH; i++) {
+      const $typeAt = $types.children[$types.children.length - 1];
+      const $clone = $typeAt.cloneNode(true);
+      $types.prepend($clone);
+      $types.removeChild($typeAt);
+    }
+  }
+
+  // Reset data-index of every children
+  Array.from($types.children).forEach(($children, index) => {
+    $children.setAttribute("data-index", index);
+  });
+}
+
+function changeActiveType(nextType, forced = false) {
+  renderInfiniteScroll();
+
+  const $nextType = getNodeTypeFromString(nextType);
+  if (!$nextType) {
+    console.warn(`Type ${nextType} does not exist`);
+    return;
+  }
 
   const $activeType = getNodeTypeActive();
-  if ($nextType === $activeType) return;
+  if ($nextType === $activeType && !forced) {
+    console.warn(`Type ${nextType} is already active`);
+    return;
+  }
 
   const oldType = $activeType.dataset.type;
   const oldIndex = $activeType.dataset.index;
@@ -266,7 +324,7 @@ function onMouseWheel(e) {
     e.deltaY > 0
       ? $activeType.nextElementSibling
       : $activeType.previousElementSibling;
-  changeActiveType($nextType);
+  changeActiveType($nextType.dataset.type);
 }
 
 function throttle(fn) {
@@ -297,7 +355,7 @@ const keyPressesToCharIndex = {
 
 $types.addEventListener("click", (e) => {
   if (e.target.dataset.type) {
-    changeActiveType(e.target);
+    changeActiveType(e.target.dataset.type);
   }
 });
 
@@ -308,7 +366,7 @@ window.addEventListener("keydown", (e) => {
       e.key === "ArrowDown"
         ? $activeType.nextElementSibling
         : $activeType.previousElementSibling;
-    changeActiveType($nextType);
+    changeActiveType($nextType.dataset.type);
     return;
   }
 
@@ -319,7 +377,7 @@ window.addEventListener("keydown", (e) => {
     activeTypeStrArr[changeTypeIndex] = e.key.toUpperCase();
     const newTypeStr = activeTypeStrArr.join("");
     const $nextType = getNodeTypeFromString(newTypeStr);
-    changeActiveType($nextType);
+    changeActiveType($nextType.dataset.type);
   }
 });
 
@@ -390,15 +448,10 @@ $cfs.addEventListener("click", (e) => {
       createCognFunctions();
 
       const newType = calculateTypeFromStack(newPrimary, newSecondary);
-      const $nextType = getNodeTypeFromString(newType);
-
-      changeActiveType($nextType);
+      changeActiveType(newType);
     }, SWAP_DURATION);
   }
 });
-
-createMBTITypes();
-createCognFunctions();
 
 $cfs.addEventListener("dragstart", (e) => {
   e.target.classList.add("dragging");
@@ -467,9 +520,10 @@ $cfs.addEventListener("drop", (e) => {
   currentType[incomingIdx] = e.target.dataset.cf;
 
   const newType = calculateTypeFromStack(currentType[0], currentType[1]);
-  const $nextType = getNodeTypeFromString(newType);
-  changeActiveType($nextType);
+  changeActiveType(newType);
 });
 
 // On Load - random type
-changeActiveType(getNodeTypeFromString("ENFP"));
+createMBTITypes();
+createCognFunctions();
+changeActiveType("ENFP", true);
