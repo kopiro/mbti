@@ -206,8 +206,6 @@ function renderInfiniteScroll() {
     $nextType = $nextType ? $nextType.nextElementSibling : null;
   }
 
-  console.log("prev, next", $prevType, $nextType);
-
   if (!$nextType) {
     for (let i = 0; i < DEPTH; i++) {
       const $typeAt = $types.children[0];
@@ -232,8 +230,6 @@ function renderInfiniteScroll() {
 }
 
 function changeActiveType(nextType, forced = false) {
-  renderInfiniteScroll();
-
   const $nextType = getNodeTypeFromString(nextType);
   if (!$nextType) {
     console.warn(`Type ${nextType} does not exist`);
@@ -253,6 +249,8 @@ function changeActiveType(nextType, forced = false) {
 
   $activeType.classList.remove("active");
   $nextType.classList.add("active");
+
+  renderInfiniteScroll();
 
   // Move y of $types to show active type
   $types.animate(
@@ -520,7 +518,9 @@ $cfs.addEventListener("drop", (e) => {
   currentType[incomingIdx] = e.target.dataset.cf;
 
   const newType = calculateTypeFromStack(currentType[0], currentType[1]);
-  changeActiveType(newType);
+  setTimeout(() => {
+    changeActiveType(newType);
+  }, 100);
 });
 
 // On Load - random type
