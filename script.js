@@ -269,8 +269,20 @@ function onMouseWheel(e) {
   changeActiveType($nextType);
 }
 
+function throttle(fn) {
+  let isThrottled = false;
+  return function (...args) {
+    if (isThrottled) return;
+    isThrottled = true;
+    setTimeout(() => {
+      isThrottled = false;
+    }, 100);
+    fn(...args);
+  };
+}
+
 // Change active type
-document.body.addEventListener("mousewheel", onMouseWheel);
+document.body.addEventListener("mousewheel", throttle(onMouseWheel));
 
 const keyPressesToCharIndex = {
   e: 0,
