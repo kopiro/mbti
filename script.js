@@ -1,13 +1,4 @@
-const cognFuncNames = {
-  Si: "Introverted Sensing",
-  Se: "Extroverted Sensing",
-  Ni: "Introverted Intuition",
-  Ne: "Extroverted Intuition",
-  Ti: "Introverted Thinking",
-  Te: "Extroverted Thinking",
-  Fi: "Introverted Feeling",
-  Fe: "Extroverted Feeling",
-};
+// MBTI theory
 
 const mbtiTypes = {
   ISTJ: {
@@ -92,11 +83,43 @@ const mbtiTypes = {
   },
 };
 
+const cognFuncNames = {
+  Si: "Introverted Sensing",
+  Se: "Extroverted Sensing",
+  Ni: "Introverted Intuition",
+  Ne: "Extroverted Intuition",
+  Ti: "Introverted Thinking",
+  Te: "Extroverted Thinking",
+  Fi: "Introverted Feeling",
+  Fe: "Extroverted Feeling",
+};
+
+const mbtiOppositeCf = {
+  T: "F",
+  F: "T",
+  S: "N",
+  N: "S",
+};
+
+const mbtiOppositeExtraversion = {
+  e: "i",
+  i: "e",
+};
+
+const mbtiOppositeJP = {
+  J: "P",
+  P: "J",
+};
+
+// DOM nodes
+
 const $types = document.querySelector("#types");
 const $typesdesc = document.querySelector("#typesdesc");
 const $cfs = document.querySelector("#cfs");
 const $cfsByIndex = new Array(8).fill(null);
 const $cfsDescByIndex = new Array(4).fill(null);
+
+// Constants
 
 const SCROLL_DURATION = 800;
 const INITIAL_TYPE = (() => {
@@ -149,6 +172,59 @@ function getJP(cf) {
 
 function getExtraversion(cf) {
   return cf.substr(1, 1);
+}
+
+function calculateNewTypeAfterSwap(inCf, dropIndex) {
+  const inExt = getExtraversion(inCf);
+  const inOppExt = mbtiOppositeExtraversion[inExt];
+
+  const inCfBase = inCf.substr(0, 1);
+  const inJP = getJP(inCf);
+  const inOppJP = mbtiOppositeJP[inJP];
+  const inOppCf = mbtiOppositeCf[inCf.substr(0, 1)];
+
+  // If we are assignining after the main stack, just inverted the cf extraversion
+  if (dropIndex >= 4) {
+    return calculateNewTypeAfterSwap(`${inCfBase}${inOppExt}`, dropIndex - 4);
+  }
+
+  const currentType = $cfsByIndex
+    .slice(0, 4)
+    .map((e) => e.dataset.cf.substr(0, 1));
+
+  const newBuildType = [null, null, null, null];
+
+  // Remove incomingFn from currentType
+  currentType.splice(
+    currentType.findIndex((fn) => fn.substr(0, 1) === inCf.substr(0, 1)),
+    1
+  );
+
+  if (dropIndex === 0) {
+    newBuildType[0] = inCf;
+    newBuildType[1] =
+      currentType.find((fn) => getJP(fn) === inOppJP) + inOppExt;
+    // newBuildType[2] = mbtiOppositeCf[newBuildType[1].substr(0, 1)] + inExt;
+    // newBuildType[3] = inOppCf + inOppExt;
+  } else if (dropIndex === 1) {
+    newBuildType[0] =
+      currentType.find((fn) => getJP(fn) === inOppJP) + inOppExt;
+    newBuildType[1] = inCf;
+    // newBuildType[2] = inOppCf + inOppExt;
+    // newBuildType[3] = mbtiOppositeCf[newBuildType[0].substr(0, 1)] + inExt;
+  } else if (dropIndex === 2) {
+    newBuildType[0] = currentType.find((fn) => getJP(fn) === inOppJP) + inExt;
+    newBuildType[1] = inOppCf + inOppExt;
+    // newBuildType[2] = inCf;
+    // newBuildType[3] = mbtiOppositeCf[newBuildType[0].substr(0, 1)] + inOppExt;
+  } else if (dropIndex === 3) {
+    newBuildType[0] = inOppCf + inOppExt;
+    newBuildType[1] = currentType.find((fn) => getJP(fn) === inOppJP) + inExt;
+    // newBuildType[2] = mbtiOppositeCf[newBuildType[1].substr(0, 1)] + inOppExt;
+    // newBuildType[3] = inCf;
+  }
+
+  return calculateTypeFromStack(newBuildType[0], newBuildType[1]);
 }
 
 function createCognFunctions() {
@@ -237,8 +313,7 @@ function getNodeTypeFromString(typeStr) {
   return document.querySelector(`.type[data-type="${typeStr}"]`);
 }
 
-const DEPTH = 4;
-
+const INFINITE_SCROLL_DEPTH = 4;
 function renderInfiniteScroll() {
   const $activeType = getNodeTypeActive();
   if (!$activeType) {
@@ -249,13 +324,13 @@ function renderInfiniteScroll() {
   $prevType = $activeType;
   $nextType = $activeType;
 
-  for (let i = 0; i < DEPTH; i++) {
+  for (let i = 0; i < INFINITE_SCROLL_DEPTH; i++) {
     $prevType = $prevType ? $prevType.previousElementSibling : null;
     $nextType = $nextType ? $nextType.nextElementSibling : null;
   }
 
   if (!$nextType) {
-    for (let i = 0; i < DEPTH; i++) {
+    for (let i = 0; i < INFINITE_SCROLL_DEPTH; i++) {
       const $typeAt = $types.children[0];
       const $clone = $typeAt.cloneNode(true);
       $types.appendChild($clone);
@@ -263,7 +338,7 @@ function renderInfiniteScroll() {
     }
   }
   if (!$prevType) {
-    for (let i = 0; i < DEPTH; i++) {
+    for (let i = 0; i < INFINITE_SCROLL_DEPTH; i++) {
       const $typeAt = $types.children[$types.children.length - 1];
       const $clone = $typeAt.cloneNode(true);
       $types.prepend($clone);
@@ -378,7 +453,8 @@ function throttle(fn) {
   };
 }
 
-// Change active type
+// Listeners
+
 document.body.addEventListener("mousewheel", throttle(onMouseWheel));
 
 $types.addEventListener("click", (e) => {
@@ -424,148 +500,6 @@ window.addEventListener("keydown", (e) => {
     changeActiveType($nextType.dataset.type);
   }
 });
-
-const SWAP_DURATION = 500;
-
-// $cfs.addEventListener("click", (e) => {
-//   if (e.target.dataset.cf) {
-//     for (let i = 0; i < 4; i++) {
-//       // Animate the two cf
-//       const $leftCf = $cfs.children[i].querySelector(".cfspanwrap").children[0];
-//       const $rightCf =
-//         $cfs.children[i].querySelector(".cfspanwrap").children[1];
-
-//       const leftCfWidth = $leftCf.offsetWidth;
-
-//       // Clone leftCf, change text and modify class to .cfb
-//       const $leftCfClone = $leftCf.cloneNode(true);
-//       $leftCfClone.innerText = $rightCf.innerText;
-//       $leftCfClone.setAttribute("class", "cfa");
-//       $leftCfClone.setAttribute("data-cloned", true);
-//       $leftCfClone.style.opacity = 0;
-//       $leftCfClone.style.position = "absolute";
-//       $leftCf.parentElement.appendChild($leftCfClone);
-//       const widthOfLeftCf = $leftCfClone.offsetWidth;
-//       $leftCf.parentElement.removeChild($leftCfClone);
-
-//       $leftCf.style.position = "absolute";
-//       $leftCf.style.left = 0;
-
-//       $rightCf.style.position = "absolute";
-//       $rightCf.style.left = `${leftCfWidth + 20}px`;
-//       $leftCf.style.bottom = `22px`;
-
-//       $leftCf.setAttribute("class", "cfb");
-//       $rightCf.setAttribute("class", "cfa");
-
-//       const leftFinalValue = widthOfLeftCf + 20;
-//       $leftCf.animate(
-//         {
-//           translate: [`0 0`, `${leftFinalValue}px 0`],
-//         },
-//         {
-//           duration: SWAP_DURATION,
-//           easing: "ease-out",
-//           fill: "forwards",
-//         }
-//       );
-
-//       const rightFinalValue = -(leftCfWidth + 20);
-//       $rightCf.animate(
-//         {
-//           translate: [`0 0`, `${rightFinalValue}px 0`],
-//         },
-//         {
-//           duration: SWAP_DURATION,
-//           easing: "ease-out",
-//           fill: "forwards",
-//         }
-//       );
-//     }
-
-//     setTimeout(() => {
-//       const newPrimary =
-//         document.querySelector(`[data-cf-index="4"]`).innerText;
-//       const newSecondary =
-//         document.querySelector(`[data-cf-index="5"]`).innerText;
-
-//       createCognFunctions();
-
-//       const newType = calculateTypeFromStack(newPrimary, newSecondary);
-//       changeActiveType(newType);
-//     }, SWAP_DURATION);
-//   }
-// });
-
-const mbtiOppositeCf = {
-  T: "F",
-  F: "T",
-  S: "N",
-  N: "S",
-};
-
-const mbtiOppositeExtraversion = {
-  e: "i",
-  i: "e",
-};
-
-const mbtiOppositeJP = {
-  J: "P",
-  P: "J",
-};
-
-function calculateNewTypeAfterSwap(inCf, dropIndex) {
-  const inExt = getExtraversion(inCf);
-  const inOppExt = mbtiOppositeExtraversion[inExt];
-
-  const inCfBase = inCf.substr(0, 1);
-  const inJP = getJP(inCf);
-  const inOppJP = mbtiOppositeJP[inJP];
-  const inOppCf = mbtiOppositeCf[inCf.substr(0, 1)];
-
-  // If we are assignining after the main stack, just inverted the cf extraversion
-  if (dropIndex >= 4) {
-    return calculateNewTypeAfterSwap(`${inCfBase}${inOppExt}`, dropIndex - 4);
-  }
-
-  const currentType = $cfsByIndex
-    .slice(0, 4)
-    .map((e) => e.dataset.cf.substr(0, 1));
-
-  const newBuildType = [null, null, null, null];
-
-  // Remove incomingFn from currentType
-  currentType.splice(
-    currentType.findIndex((fn) => fn.substr(0, 1) === inCf.substr(0, 1)),
-    1
-  );
-
-  if (dropIndex === 0) {
-    newBuildType[0] = inCf;
-    newBuildType[1] =
-      currentType.find((fn) => getJP(fn) === inOppJP) + inOppExt;
-    // newBuildType[2] = mbtiOppositeCf[newBuildType[1].substr(0, 1)] + inExt;
-    // newBuildType[3] = inOppCf + inOppExt;
-  } else if (dropIndex === 1) {
-    newBuildType[0] =
-      currentType.find((fn) => getJP(fn) === inOppJP) + inOppExt;
-    newBuildType[1] = inCf;
-    // newBuildType[2] = inOppCf + inOppExt;
-    // newBuildType[3] = mbtiOppositeCf[newBuildType[0].substr(0, 1)] + inExt;
-  } else if (dropIndex === 2) {
-    newBuildType[0] = currentType.find((fn) => getJP(fn) === inOppJP) + inExt;
-    newBuildType[1] = inOppCf + inOppExt;
-    // newBuildType[2] = inCf;
-    // newBuildType[3] = mbtiOppositeCf[newBuildType[0].substr(0, 1)] + inOppExt;
-  } else if (dropIndex === 3) {
-    newBuildType[0] = inOppCf + inOppExt;
-    newBuildType[1] = currentType.find((fn) => getJP(fn) === inOppJP) + inExt;
-    // newBuildType[2] = mbtiOppositeCf[newBuildType[1].substr(0, 1)] + inOppExt;
-    // newBuildType[3] = inCf;
-  }
-
-  return calculateTypeFromStack(newBuildType[0], newBuildType[1]);
-}
 
 $cfs.addEventListener("dragstart", (e) => {
   e.target.classList.add("dragging");
