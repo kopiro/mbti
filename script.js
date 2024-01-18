@@ -541,6 +541,7 @@ $cfs.addEventListener("dragstart", (e) => {
   e.target.classList.add("dragging");
 
   const incomingCf = e.target.dataset.cf;
+  e.dataTransfer.effectAllowed = "move";
   e.dataTransfer.setData("text/plain", incomingCf);
 
   $cfs.querySelectorAll(`[draggable]`).forEach(($scf) => {

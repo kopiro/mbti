@@ -125,11 +125,16 @@ body {
 
 .cf {
   display: inline-block;
-  transform-origin: 50% 50%;
   position: relative;
   line-height: 1em;
   cursor: move;
   padding: 0 4px;
+  transition: translate 0.15s ease-out;
+}
+
+.cf:hover {
+  opacity: 0.5;
+  translate: 0px -10px;
 }
 
 .cfa {
@@ -144,10 +149,6 @@ body {
   font-size: 80px;
   font-style: italic;
   color: var(--secondary-color);
-}
-
-.cf:hover .cfb {
-  opacity: 0.5;
 }
 
 .cfdesc {
@@ -168,7 +169,7 @@ body {
     translate: 0 0;
   }
   75% {
-    translate: 2px 0;
+    tranneslate: 2px 0;
   }
   100% {
     translate: 0 0;
@@ -176,17 +177,21 @@ body {
 }
 
 .cf.dragging {
-  opacity: 0.5;
+  opacity: 0.2;
 }
 
 .cf.droppable {
   opacity: 0.8;
-  transition: scale 0.3s ease-in-out;
+  transition: scale 0.2s ease-out, color 0.2s ease-out;
   animation: shake 0.3s linear infinite;
 }
 
-.cf.droppable.over {
-  scale: 0.8;
-  opacity: 0.2;
-  border: 1px dashed var(--primary-color);
+.cfa.droppable.over {
+  scale: 1.1;
+  color: var(--secondary-color);
+}
+
+.cfb.droppable.over {
+  scale: 1.1;
+  color: var(--primary-color);
 }
