@@ -540,18 +540,7 @@ $cfs.addEventListener("dragstart", (e) => {
   e.target.classList.add("dragging");
 
   const incomingCf = e.target.dataset.cf;
-  const incomingIdx = Number(e.target.dataset.position);
-  const incomingJp = getJP(incomingCf);
-
-  // Set data JSON
-  e.dataTransfer.setData(
-    "text/plain",
-    JSON.stringify({
-      incomingCf,
-      incomingIdx,
-      incomingJp,
-    })
-  );
+  e.dataTransfer.setData("text/plain", incomingCf);
 
   $cfs.querySelectorAll(`[draggable]`).forEach(($scf) => {
     if ($scf === e.target) return;
@@ -585,8 +574,7 @@ $cfs.addEventListener("drop", (e) => {
   e.stopPropagation();
   if (!e.target.classList.contains("droppable")) return;
 
-  const data = JSON.parse(e.dataTransfer.getData("text/plain"));
-  const { incomingCf, incomingIdx } = data;
+  const incomingCf = e.dataTransfer.getData("text/plain");
 
   const newType = calculateNewTypeAfterSwap(
     incomingCf,
