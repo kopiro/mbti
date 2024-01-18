@@ -6,11 +6,6 @@ html {
   --secondary-color: #b8b3a7;
 }
 
-body,
-input {
-  font-family: "Helvetica Neue", Arial, Helvetica, sans-serif, sans-serif;
-}
-
 body {
   width: 100vw;
   height: 100vh;
@@ -24,6 +19,7 @@ body {
   bottom: 0;
   right: 0;
   margin: 0;
+  font-family: "Helvetica Neue", Arial, Helvetica, sans-serif, sans-serif;
   -webkit-user-select: none;
 }
 
@@ -39,31 +35,33 @@ body {
   margin-top: -140px;
   z-index: 0;
   gap: 40px;
+  width: 800px;
+  overflow: hidden;
 }
 
 .type {
   font-weight: 100;
   color: var(--secondary-color);
+  font-style: italic;
   font-size: var(--type-height);
   height: var(--type-height);
   line-height: var(--type-height);
-  font-style: italic;
-  transition: translate 0.5s ease-out, font-size 0.8s ease-out;
+  transition: translate 0.5s ease-out;
 }
 
 .type:hover {
   cursor: pointer;
-  opacity: 0.6;
+  opacity: 0.3;
 }
 
 .type.active {
-  color: var(--primary-color);
   font-weight: 900;
-  font-size: var(--type-active-height);
+  color: var(--primary-color);
   font-style: normal;
+  font-size: var(--type-active-height);
   height: var(--type-active-height);
   line-height: var(--type-active-height);
-  translate: 50px;
+  translate: 50px 0;
 }
 
 .type.active:hover {
@@ -72,7 +70,6 @@ body {
 }
 
 #typesdesc {
-  font-family: "Georgia", serif;
   color: var(--primary-color);
   position: absolute;
   top: 50%;
@@ -83,6 +80,8 @@ body {
   width: 600px;
   height: 300px;
   z-index: 1;
+  font-family: "Georgia", serif;
+  margin-top: calc(var(--type-active-height) / 2);
 }
 
 .typedesc {
@@ -90,7 +89,6 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  margin-top: calc(var(--type-active-height) / 2);
   transition: opacity 0.5s ease-in;
 }
 
@@ -108,6 +106,12 @@ body {
   top: 50%;
   translate: 0 -50%;
   width: 400px;
+}
+
+@media (max-width: 1600px) {
+  #cfs {
+    display: none;
+  }
 }
 
 .cfwrap {

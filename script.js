@@ -287,7 +287,7 @@ function changeActiveType(nextType, forced = false) {
     },
     {
       duration: SCROLL_DURATION,
-      easing: "ease-out",
+      easing: "ease-in-out",
       fill: "forwards",
     }
   );
@@ -307,7 +307,8 @@ function changeActiveType(nextType, forced = false) {
     },
     {
       duration: SCROLL_DURATION,
-      easing: "ease-out",
+      easing: "ease-in-out",
+      fill: "forwards",
     }
   );
   $nextTypeDesc.animate(
@@ -316,7 +317,8 @@ function changeActiveType(nextType, forced = false) {
     },
     {
       duration: SCROLL_DURATION,
-      easing: "ease-out",
+      easing: "ease-in-out",
+      fill: "forwards",
     }
   );
   $activeTypeDesc.classList.remove("active");
