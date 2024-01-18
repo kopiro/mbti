@@ -1,11 +1,3 @@
-const $types = document.querySelector("#types");
-const $typesdesc = document.querySelector("#typesdesc");
-const $cfs = document.querySelector("#cfs");
-const $cfsByIndex = new Array(8).fill(null);
-const $cfsDescByIndex = new Array(4).fill(null);
-
-const SCROLL_DURATION = 800;
-
 const cognFuncNames = {
   Si: "Introverted Sensing",
   Se: "Extroverted Sensing",
@@ -100,6 +92,21 @@ const mbtiTypes = {
   },
 };
 
+const $types = document.querySelector("#types");
+const $typesdesc = document.querySelector("#typesdesc");
+const $cfs = document.querySelector("#cfs");
+const $cfsByIndex = new Array(8).fill(null);
+const $cfsDescByIndex = new Array(4).fill(null);
+
+const SCROLL_DURATION = 800;
+const INITIAL_TYPE = (() => {
+  const locationHash = location.hash.toUpperCase().replace("#", "");
+  if (locationHash.length === 4 && locationHash in mbtiTypes) {
+    return locationHash;
+  }
+  return "ENFP";
+})();
+
 function calculateTypeFromStack(primary, secondary) {
   const [pFn, pExt] = primary.split("");
   const [sFn, sExt] = secondary.split("");
@@ -118,7 +125,7 @@ function calculateTypeFromStack(primary, secondary) {
       ? "P"
       : null;
   if (!jp) {
-    console.warn("No jp", arguments);
+    console.warn("No JP defined", arguments);
     return null;
   }
 
@@ -133,7 +140,11 @@ function calculateTypeFromStack(primary, secondary) {
 }
 
 function getJP(cf) {
-  return ["T", "F"].includes(cf.substr(0, 1)) ? "J" : "P";
+  return ["T", "F"].includes(cf.substr(0, 1))
+    ? "J"
+    : ["S", "N"].includes(cf.substr(0, 1))
+    ? "P"
+    : null;
 }
 
 function getExtraversion(cf) {
@@ -181,6 +192,9 @@ function createCognFunctions() {
 }
 
 function createMBTITypes() {
+  $types.innerHTML = "";
+  $typesdesc.innerHTML = "";
+
   let index = 0;
 
   // Create a div for each type in $types
@@ -189,22 +203,29 @@ function createMBTITypes() {
     $type.setAttribute("data-type", type);
     $type.setAttribute("data-index", index);
     $type.classList.add("type");
-    if (type === "ENFP") {
+    if (type === INITIAL_TYPE) {
       $type.classList.add("active");
     }
-    $type.innerText = type;
+
+    // Create a span for each letter in type
+    for (const letter of type) {
+      const $letter = document.createElement("span");
+      $letter.classList.add("letter");
+      $letter.innerText = letter;
+      $type.appendChild($letter);
+    }
     $types.appendChild($type);
 
     const $typedesc = document.createElement("div");
     $typedesc.setAttribute("data-type", type);
     $typedesc.classList.add("typedesc");
-    if (type === "ENFP") {
+    if (type === INITIAL_TYPE) {
       $typedesc.classList.add("active");
     }
     $typedesc.innerText = mbtiTypes[type].description;
     $typesdesc.appendChild($typedesc);
 
-    ++index;
+    index++;
   }
 }
 
@@ -269,6 +290,8 @@ function changeActiveType(nextType, forced = false) {
     return;
   }
 
+  location.hash = nextType.toLowerCase();
+
   $activeType.classList.remove("active");
   $nextType.classList.add("active");
 
@@ -297,7 +320,6 @@ function changeActiveType(nextType, forced = false) {
   const $activeTypeDesc = document.querySelector(
     `.typedesc[data-type="${oldType}"]`
   );
-  // Find new $typesdesc to show active type
   const $nextTypeDesc = document.querySelector(
     `.typedesc[data-type="${nextType}"]`
   );
@@ -321,6 +343,7 @@ function changeActiveType(nextType, forced = false) {
       fill: "forwards",
     }
   );
+
   $activeTypeDesc.classList.remove("active");
   $nextTypeDesc.classList.add("active");
 
@@ -359,8 +382,13 @@ function throttle(fn) {
 document.body.addEventListener("mousewheel", throttle(onMouseWheel));
 
 $types.addEventListener("click", (e) => {
-  if (e.target.dataset.type) {
-    changeActiveType(e.target.dataset.type);
+  let $parent = e.target;
+  while (!$parent.dataset.type) {
+    $parent = $parent.parentElement;
+  }
+
+  if ($parent.dataset.type) {
+    changeActiveType($parent.dataset.type);
   }
 });
 
@@ -593,4 +621,4 @@ $cfs.addEventListener("drop", (e) => {
 // On Load - random type
 createMBTITypes();
 createCognFunctions();
-changeActiveType("ENFP", true);
+changeActiveType(INITIAL_TYPE, true);

@@ -36,7 +36,6 @@ body {
   z-index: 0;
   gap: 40px;
   width: 800px;
-  overflow: hidden;
 }
 
 .type {
@@ -46,12 +45,16 @@ body {
   font-size: var(--type-height);
   height: var(--type-height);
   line-height: var(--type-height);
-  transition: translate 0.5s ease-out;
+  transition: translate 0.5s 0.3s ease-out, font-size 0.5s ease-out;
 }
 
 .type:hover {
   cursor: pointer;
   opacity: 0.3;
+}
+
+.type .letter {
+  display: inline-block;
 }
 
 .type.active {
@@ -69,6 +72,16 @@ body {
   cursor: normal;
 }
 
+/* .type.active .letter {
+  transition: opacity 0.2s ease-in, translate 0.2s ease-in;
+}
+
+.type.active .letter:hover {
+  cursor: pointer;
+  opacity: 0.8;
+  translate: 0px -10px;
+} */
+
 #typesdesc {
   color: var(--primary-color);
   position: absolute;
@@ -81,7 +94,7 @@ body {
   height: 300px;
   z-index: 1;
   font-family: "Georgia", serif;
-  margin-top: calc(var(--type-active-height) / 2);
+  margin-top: calc(var(--type-active-height) / 1.5);
 }
 
 .typedesc {
@@ -99,13 +112,13 @@ body {
 
 #cfs {
   position: absolute;
-  right: 100px;
+  right: 200px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   top: 50%;
   translate: 0 -50%;
-  width: 400px;
+  width: 200px;
 }
 
 @media (max-width: 1600px) {
@@ -138,7 +151,7 @@ body {
 
 .cf:hover {
   opacity: 0.5;
-  translate: 0px -10px;
+  translate: -10px 0px;
 }
 
 .cfa {
