@@ -124,13 +124,12 @@ body {
 }
 
 .cf {
-  transition: font-size 0.5s ease-out;
-  cursor: pointer;
   display: inline-block;
   transform-origin: 50% 50%;
   position: relative;
   line-height: 1em;
   cursor: move;
+  padding: 0 4px;
 }
 
 .cfa {
@@ -163,13 +162,13 @@ body {
     translate: 0 0;
   }
   25% {
-    translate: -5px 0;
+    translate: -2px 0;
   }
   50% {
     translate: 0 0;
   }
   75% {
-    translate: 5px 0;
+    translate: 2px 0;
   }
   100% {
     translate: 0 0;
@@ -181,12 +180,13 @@ body {
 }
 
 .cf.droppable {
-  opacity: 0.6;
-  transition: scale 0.4s ease-in-out;
-  animation: shake 0.4s linear infinite;
+  opacity: 0.8;
+  transition: scale 0.3s ease-in-out;
+  animation: shake 0.3s linear infinite;
 }
 
 .cf.droppable.over {
   scale: 0.8;
   opacity: 0.2;
+  border: 1px dashed var(--primary-color);
 }
