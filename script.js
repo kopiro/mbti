@@ -373,7 +373,7 @@ function throttle(fn) {
     isThrottled = true;
     setTimeout(() => {
       isThrottled = false;
-    }, 100);
+    }, 150);
     fn(...args);
   };
 }
