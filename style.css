@@ -110,7 +110,7 @@ body {
   width: 400px;
 }
 
-.cf {
+.cfwrap {
   border: 1px solid transparent;
   cursor: pointer;
   width: 400px;
@@ -123,17 +123,14 @@ body {
   position: relative;
 }
 
-.cf * {
-  pointer-events: none;
-}
-
-.cfspanwrap > * {
+.cf {
   transition: font-size 0.5s ease-out;
   cursor: pointer;
   display: inline-block;
-  transform-origin: 0 100%;
+  transform-origin: 50% 50%;
   position: relative;
   line-height: 1em;
+  cursor: move;
 }
 
 .cfa {
@@ -166,13 +163,13 @@ body {
     translate: 0 0;
   }
   25% {
-    translate: -10px 0;
+    translate: -5px 0;
   }
   50% {
     translate: 0 0;
   }
   75% {
-    translate: 10px 0;
+    translate: 5px 0;
   }
   100% {
     translate: 0 0;
@@ -180,18 +177,16 @@ body {
 }
 
 .cf.dragging {
-  opacity: 0.2;
+  opacity: 0.5;
 }
 
 .cf.droppable {
   opacity: 0.6;
-  animation: shake 1s ease-in-out infinite;
+  transition: scale 0.4s ease-in-out;
+  animation: shake 0.4s linear infinite;
 }
 
-.cf.droppable > * {
-  transition: translate 0.15s ease-out;
-}
-
-.cf.droppable.over > * {
-  translate: 100px 0;
+.cf.droppable.over {
+  scale: 0.8;
+  opacity: 0.2;
 }

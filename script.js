@@ -145,21 +145,24 @@ function createCognFunctions() {
 
   for (let i = 0; i < 4; i++) {
     const $func = document.createElement("div");
-    $func.setAttribute("draggable", true);
     $func.setAttribute("data-position", i);
-    $func.classList.add("cf");
+    $func.classList.add("cfwrap");
 
     const $spanwrap = document.createElement("div");
     $spanwrap.classList.add("cfspanwrap");
 
     const $span1 = document.createElement("span");
     $span1.setAttribute("data-cf-index", i);
+    $span1.classList.add("cf");
     $span1.classList.add("cfa");
+    $span1.setAttribute("draggable", true);
     $spanwrap.appendChild($span1);
 
     const $span2 = document.createElement("span");
     $span2.setAttribute("data-cf-index", i + 4);
+    $span2.classList.add("cf");
     $span2.classList.add("cfb");
+    $span2.setAttribute("draggable", true);
     $spanwrap.appendChild($span2);
 
     $func.appendChild($spanwrap);
@@ -319,20 +322,11 @@ function changeActiveType(nextType, forced = false) {
   $activeTypeDesc.classList.remove("active");
   $nextTypeDesc.classList.add("active");
 
-  const cognitiveFunctions = mbtiTypes[nextType].functions;
-  // Populate cognitive functions
-  cognitiveFunctions.forEach((text, index) => {
+  mbtiTypes[nextType].functions.forEach((text, index) => {
     $cfsByIndex[index].innerText = text;
+    $cfsByIndex[index].setAttribute("data-cf", text);
 
     if (index <= 3) {
-      $cfsByIndex[index].parentElement.parentElement.setAttribute(
-        "data-cf",
-        text
-      );
-      $cfsByIndex[index].parentElement.parentElement.setAttribute(
-        "data-jp",
-        getJP(text)
-      );
       $cfsDescByIndex[index].innerText = cognFuncNames[text];
     }
   });
@@ -403,75 +397,75 @@ window.addEventListener("keydown", (e) => {
 
 const SWAP_DURATION = 500;
 
-$cfs.addEventListener("click", (e) => {
-  if (e.target.dataset.cf) {
-    for (let i = 0; i < 4; i++) {
-      // Animate the two cf
-      const $leftCf = $cfs.children[i].querySelector(".cfspanwrap").children[0];
-      const $rightCf =
-        $cfs.children[i].querySelector(".cfspanwrap").children[1];
+// $cfs.addEventListener("click", (e) => {
+//   if (e.target.dataset.cf) {
+//     for (let i = 0; i < 4; i++) {
+//       // Animate the two cf
+//       const $leftCf = $cfs.children[i].querySelector(".cfspanwrap").children[0];
+//       const $rightCf =
+//         $cfs.children[i].querySelector(".cfspanwrap").children[1];
 
-      const leftCfWidth = $leftCf.offsetWidth;
+//       const leftCfWidth = $leftCf.offsetWidth;
 
-      // Clone leftCf, change text and modify class to .cfb
-      const $leftCfClone = $leftCf.cloneNode(true);
-      $leftCfClone.innerText = $rightCf.innerText;
-      $leftCfClone.setAttribute("class", "cfa");
-      $leftCfClone.setAttribute("data-cloned", true);
-      $leftCfClone.style.opacity = 0;
-      $leftCfClone.style.position = "absolute";
-      $leftCf.parentElement.appendChild($leftCfClone);
-      const widthOfLeftCf = $leftCfClone.offsetWidth;
-      $leftCf.parentElement.removeChild($leftCfClone);
+//       // Clone leftCf, change text and modify class to .cfb
+//       const $leftCfClone = $leftCf.cloneNode(true);
+//       $leftCfClone.innerText = $rightCf.innerText;
+//       $leftCfClone.setAttribute("class", "cfa");
+//       $leftCfClone.setAttribute("data-cloned", true);
+//       $leftCfClone.style.opacity = 0;
+//       $leftCfClone.style.position = "absolute";
+//       $leftCf.parentElement.appendChild($leftCfClone);
+//       const widthOfLeftCf = $leftCfClone.offsetWidth;
+//       $leftCf.parentElement.removeChild($leftCfClone);
 
-      $leftCf.style.position = "absolute";
-      $leftCf.style.left = 0;
+//       $leftCf.style.position = "absolute";
+//       $leftCf.style.left = 0;
 
-      $rightCf.style.position = "absolute";
-      $rightCf.style.left = `${leftCfWidth + 20}px`;
-      $leftCf.style.bottom = `22px`;
+//       $rightCf.style.position = "absolute";
+//       $rightCf.style.left = `${leftCfWidth + 20}px`;
+//       $leftCf.style.bottom = `22px`;
 
-      $leftCf.setAttribute("class", "cfb");
-      $rightCf.setAttribute("class", "cfa");
+//       $leftCf.setAttribute("class", "cfb");
+//       $rightCf.setAttribute("class", "cfa");
 
-      const leftFinalValue = widthOfLeftCf + 20;
-      $leftCf.animate(
-        {
-          translate: [`0 0`, `${leftFinalValue}px 0`],
-        },
-        {
-          duration: SWAP_DURATION,
-          easing: "ease-out",
-          fill: "forwards",
-        }
-      );
+//       const leftFinalValue = widthOfLeftCf + 20;
+//       $leftCf.animate(
+//         {
+//           translate: [`0 0`, `${leftFinalValue}px 0`],
+//         },
+//         {
+//           duration: SWAP_DURATION,
+//           easing: "ease-out",
+//           fill: "forwards",
+//         }
+//       );
 
-      const rightFinalValue = -(leftCfWidth + 20);
-      $rightCf.animate(
-        {
-          translate: [`0 0`, `${rightFinalValue}px 0`],
-        },
-        {
-          duration: SWAP_DURATION,
-          easing: "ease-out",
-          fill: "forwards",
-        }
-      );
-    }
+//       const rightFinalValue = -(leftCfWidth + 20);
+//       $rightCf.animate(
+//         {
+//           translate: [`0 0`, `${rightFinalValue}px 0`],
+//         },
+//         {
+//           duration: SWAP_DURATION,
+//           easing: "ease-out",
+//           fill: "forwards",
+//         }
+//       );
+//     }
 
-    setTimeout(() => {
-      const newPrimary =
-        document.querySelector(`[data-cf-index="4"]`).innerText;
-      const newSecondary =
-        document.querySelector(`[data-cf-index="5"]`).innerText;
+//     setTimeout(() => {
+//       const newPrimary =
+//         document.querySelector(`[data-cf-index="4"]`).innerText;
+//       const newSecondary =
+//         document.querySelector(`[data-cf-index="5"]`).innerText;
 
-      createCognFunctions();
+//       createCognFunctions();
 
-      const newType = calculateTypeFromStack(newPrimary, newSecondary);
-      changeActiveType(newType);
-    }, SWAP_DURATION);
-  }
-});
+//       const newType = calculateTypeFromStack(newPrimary, newSecondary);
+//       changeActiveType(newType);
+//     }, SWAP_DURATION);
+//   }
+// });
 
 const mbtiOppositeCf = {
   T: "F",
@@ -491,9 +485,23 @@ const mbtiOppositeJP = {
 };
 
 function calculateNewTypeAfterSwap(inCf, dropIndex) {
+  const inExt = getExtraversion(inCf);
+  const inOppExt = mbtiOppositeExtraversion[inExt];
+
+  const inCfBase = inCf.substr(0, 1);
+  const inJP = getJP(inCf);
+  const inOppJP = mbtiOppositeJP[inJP];
+  const inOppCf = mbtiOppositeCf[inCf.substr(0, 1)];
+
+  // If we are assignining after the main stack, just inverted the cf extraversion
+  if (dropIndex >= 4) {
+    return calculateNewTypeAfterSwap(`${inCfBase}${inOppExt}`, dropIndex - 4);
+  }
+
   const currentType = $cfsByIndex
     .slice(0, 4)
-    .map((e) => e.innerText.substr(0, 1));
+    .map((e) => e.dataset.cf.substr(0, 1));
+
   const newBuildType = [null, null, null, null];
 
   // Remove incomingFn from currentType
@@ -501,13 +509,6 @@ function calculateNewTypeAfterSwap(inCf, dropIndex) {
     currentType.findIndex((fn) => fn.substr(0, 1) === inCf.substr(0, 1)),
     1
   );
-
-  const inExt = getExtraversion(inCf);
-  const inOppExt = mbtiOppositeExtraversion[inExt];
-
-  const inJP = getJP(inCf);
-  const inOppJP = mbtiOppositeJP[inJP];
-  const inOppCf = mbtiOppositeCf[inCf.substr(0, 1)];
 
   if (dropIndex === 0) {
     newBuildType[0] = inCf;
@@ -550,7 +551,7 @@ $cfs.addEventListener("dragstart", (e) => {
 
 $cfs.addEventListener("dragend", (e) => {
   e.target.classList.remove("dragging");
-  Array.from($cfs.children).forEach(($scf) => {
+  document.querySelectorAll("[draggable]").forEach(($scf) => {
     $scf.classList.remove("droppable");
     $scf.classList.remove("over");
   });
@@ -578,7 +579,7 @@ $cfs.addEventListener("drop", (e) => {
 
   const newType = calculateNewTypeAfterSwap(
     incomingCf,
-    Number(e.target.dataset.position)
+    Number(e.target.dataset.cfIndex)
   );
 
   setTimeout(() => {
