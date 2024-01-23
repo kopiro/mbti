@@ -360,15 +360,19 @@ function changeActiveType(nextType, forced = false) {
   }
 
   const $activeType = getNodeTypeActive();
-  if ($nextType === $activeType && !forced) {
+  const activeTypeIsSame = $nextType === $activeType;
+
+  if (activeTypeIsSame && !forced) {
     console.warn(`Type ${nextType} is already active`);
     return;
   }
 
   location.hash = nextType.toLowerCase();
 
-  $activeType.classList.remove("active");
-  $nextType.classList.add("active");
+  if (!activeTypeIsSame) {
+    $activeType.classList.remove("active");
+    $nextType.classList.add("active");
+  }
 
   renderInfiniteScroll();
 
@@ -384,43 +388,46 @@ function changeActiveType(nextType, forced = false) {
       ],
     },
     {
-      duration: SCROLL_DURATION,
+      duration: activeTypeIsSame ? 0 : SCROLL_DURATION,
       easing: "ease-in-out",
       fill: "forwards",
     }
   );
 
   // Get typedesc of active type
-  const scrollBy = (Number($nextType.dataset.index) > oldIndex ? -1 : 1) * 500;
-  const $activeTypeDesc = document.querySelector(
-    `.typedesc[data-type="${oldType}"]`
-  );
-  const $nextTypeDesc = document.querySelector(
-    `.typedesc[data-type="${nextType}"]`
-  );
-  $activeTypeDesc.animate(
-    {
-      translate: [`0 0`, `0 ${scrollBy}px`],
-    },
-    {
-      duration: SCROLL_DURATION,
-      easing: "ease-in-out",
-      fill: "forwards",
-    }
-  );
-  $nextTypeDesc.animate(
-    {
-      translate: [`0 ${-scrollBy}px`, `0 0`],
-    },
-    {
-      duration: SCROLL_DURATION,
-      easing: "ease-in-out",
-      fill: "forwards",
-    }
-  );
+  if (!activeTypeIsSame) {
+    const scrollBy =
+      (Number($nextType.dataset.index) > oldIndex ? -1 : 1) * 500;
+    const $activeTypeDesc = document.querySelector(
+      `.typedesc[data-type="${oldType}"]`
+    );
+    const $nextTypeDesc = document.querySelector(
+      `.typedesc[data-type="${nextType}"]`
+    );
+    $activeTypeDesc.animate(
+      {
+        translate: [`0 0`, `0 ${scrollBy}px`],
+      },
+      {
+        duration: SCROLL_DURATION,
+        easing: "ease-in-out",
+        fill: "forwards",
+      }
+    );
+    $nextTypeDesc.animate(
+      {
+        translate: [`0 ${-scrollBy}px`, `0 0`],
+      },
+      {
+        duration: SCROLL_DURATION,
+        easing: "ease-in-out",
+        fill: "forwards",
+      }
+    );
 
-  $activeTypeDesc.classList.remove("active");
-  $nextTypeDesc.classList.add("active");
+    $activeTypeDesc.classList.remove("active");
+    $nextTypeDesc.classList.add("active");
+  }
 
   mbtiTypes[nextType].functions.forEach((text, index) => {
     $cfsByIndex[index].innerText = text;
