@@ -76,7 +76,7 @@ body {
   cursor: normal;
 }
 
-/* .type.active .letter {
+.type.active .letter {
   transition: opacity 0.2s ease-in, translate 0.2s ease-in;
 }
 
@@ -84,7 +84,7 @@ body {
   cursor: pointer;
   opacity: 0.8;
   translate: 0px -10px;
-} */
+}
 
 #typesdesc {
   color: var(--primary-color);
@@ -133,13 +133,11 @@ body {
 
 .cfwrap {
   border: 1px solid transparent;
-  width: 400px;
-  padding: 25px 0;
+  display: flex;
+  align-items: center;
 }
 
 .cfspanwrap {
-  width: 400px;
-  height: 140px;
   position: relative;
 }
 
@@ -154,7 +152,7 @@ body {
 
 .cf:hover {
   opacity: 0.5;
-  translate: -10px 0px;
+  translate: 0 -8px;
 }
 
 .cfa {
@@ -171,28 +169,22 @@ body {
   color: var(--secondary-color);
 }
 
-.cfdesc {
-  font-family: "Georgia", serif;
-  color: var(--secondary-color);
-  font-weight: 400;
-  font-size: 30px;
-}
-
+/** shake ios effect */
 @keyframes shake {
   0% {
-    translate: 0 0;
+    translate: 0px;
   }
   25% {
-    translate: -2px 0;
+    translate: 5px;
   }
   50% {
-    translate: 0 0;
+    translate: 0px;
   }
   75% {
-    tranneslate: 2px 0;
+    translate: -5px;
   }
   100% {
-    translate: 0 0;
+    translate: 0px;
   }
 }
 
@@ -203,7 +195,7 @@ body {
 .cf.droppable {
   opacity: 0.8;
   transition: scale 0.2s ease-out, color 0.2s ease-out;
-  animation: shake 0.3s linear infinite;
+  animation: shake 0.3s ease-in-out infinite;
 }
 
 .cfa.droppable.over {
@@ -214,4 +206,271 @@ body {
 .cfb.droppable.over {
   scale: 1.1;
   color: var(--primary-color);
+}
+
+#cfdesc {
+  color: var(--secodary-color);
+  position: absolute;
+  right: 480px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  top: 50%;
+  translate: 0 -50%;
+  width: 360px;
+  z-index: 1;
+  font-family: "Georgia", serif;
+  text-align: right;
+}
+
+.cfdesc12wrapper {
+  height: 160px;
+  display: flex;
+  align-items: center;
+}
+html {
+  --type-height: 130px;
+  --type-active-height: 280px;
+  --bg-color: #fcf6e6;
+  --primary-color: #1a1919;
+  --secondary-color: #b8b3a7;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--bg-color);
+  color: var(--primary-color);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  margin: 0;
+  font-family: "Helvetica Neue", Arial, Helvetica, sans-serif, sans-serif;
+}
+
+::selection {
+  background-color: var(--primary-color);
+  color: var(--bg-color);
+}
+
+#types {
+  display: flex;
+  text-align: left;
+  flex-direction: column;
+  align-items: baseline;
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  left: 50px;
+  margin-top: -140px;
+  z-index: 0;
+  gap: 40px;
+  width: 800px;
+}
+
+.type {
+  font-weight: 100;
+  color: var(--secondary-color);
+  font-style: italic;
+  font-size: var(--type-height);
+  height: var(--type-height);
+  line-height: var(--type-height);
+  transition: translate 0.5s 0.3s ease-out, font-size 0.5s ease-out;
+}
+
+.type:hover {
+  cursor: pointer;
+  opacity: 0.3;
+}
+
+.type .letter {
+  display: inline-block;
+}
+
+.type.active {
+  font-weight: 900;
+  color: var(--primary-color);
+  font-style: normal;
+  font-size: var(--type-active-height);
+  height: var(--type-active-height);
+  line-height: var(--type-active-height);
+  translate: 50px 0;
+}
+
+.type.active:hover {
+  opacity: 1;
+  cursor: normal;
+}
+
+.type.active .letter {
+  transition: opacity 0.2s ease-in, translate 0.2s ease-in;
+}
+
+.type.active .letter:hover {
+  cursor: pointer;
+  opacity: 0.8;
+  translate: 0px -10px;
+}
+
+#typesdesc {
+  color: var(--primary-color);
+  position: absolute;
+  top: 50%;
+  left: 400px;
+  font-size: 22px;
+  line-height: 1.3em;
+  text-align: left;
+  width: 600px;
+  height: 300px;
+  z-index: 1;
+  font-family: "Georgia", serif;
+  margin-top: calc(var(--type-active-height) / 1.5);
+}
+
+.typedesc {
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: opacity 0.5s ease-in;
+}
+
+.typedesc.active {
+  opacity: 1;
+  transition: opacity 0.5s ease-in;
+}
+
+#cfs {
+  position: absolute;
+  right: 90px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  top: 50%;
+  translate: 0 -50%;
+  width: 290px;
+}
+
+@media (max-width: 1600px) {
+  #cfs {
+    display: none;
+  }
+}
+
+.cfwrap {
+  border: 1px solid transparent;
+  width: 100%;
+  height: 160px;
+  display: flex;
+  align-items: center;
+}
+
+.cfspanwrap {
+  position: relative;
+}
+
+.cf {
+  display: inline-block;
+  position: relative;
+  line-height: 1em;
+  cursor: move;
+  padding: 0 4px;
+  transition: translate 0.15s ease-out;
+}
+
+.cf:hover {
+  opacity: 0.5;
+  translate: 0 -8px;
+}
+
+.cfa {
+  font-weight: 900;
+  font-size: 120px;
+  height: 120px;
+  margin-right: 20px;
+}
+
+.cfb {
+  font-weight: 100;
+  font-size: 80px;
+  font-style: italic;
+  color: var(--secondary-color);
+}
+
+/** shake ios effect */
+@keyframes shake {
+  0% {
+    translate: 0px;
+  }
+  25% {
+    translate: 5px;
+  }
+  50% {
+    translate: 0px;
+  }
+  75% {
+    translate: -5px;
+  }
+  100% {
+    translate: 0px;
+  }
+}
+
+.cf.dragging {
+  opacity: 0.2;
+}
+
+.cf.droppable {
+  opacity: 0.8;
+  transition: scale 0.2s ease-out, color 0.2s ease-out;
+  animation: shake 0.3s ease-in-out infinite;
+}
+
+.cfa.droppable.over {
+  scale: 1.1;
+  color: var(--secondary-color);
+}
+
+.cfb.droppable.over {
+  scale: 1.1;
+  color: var(--primary-color);
+}
+
+#cfdesc {
+  color: var(--secodary-color);
+  position: absolute;
+  right: 480px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  top: 50%;
+  translate: 0 -50%;
+  width: 400px;
+  z-index: 1;
+  font-family: "Georgia", serif;
+  text-align: right;
+  font-size: 18px;
+}
+
+.cfdesc12wrapper {
+  height: 160px;
+  display: flex;
+  align-items: center;
+}
+
+.cfdesc {
+  position: absolute;
+  opacity: 0;
+  translate: 25px 0;
+  transition: opacity 0.2s ease-out, translate 0.2s ease-out;
+}
+
+.cfdesc.active {
+  opacity: 1;
+  translate: 0px 0px;
+  transition: opacity 0.4s ease-out, translate 0.4s ease-out;
 }

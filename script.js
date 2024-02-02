@@ -83,15 +83,47 @@ const mbtiTypes = {
   },
 };
 
-const cognFuncNames = {
-  Si: "Introverted Sensing",
-  Se: "Extroverted Sensing",
-  Ni: "Introverted Intuition",
-  Ne: "Extroverted Intuition",
-  Ti: "Introverted Thinking",
-  Te: "Extroverted Thinking",
-  Fi: "Introverted Feeling",
-  Fe: "Extroverted Feeling",
+const cognFuncs = {
+  Si: {
+    name: "Introverted Sensing",
+    description:
+      "<b>Introverted Sensing (Si)</b> is the cognitive function that is oriented to the past. It is focused on internal sensations and reliving past experiences. Si is often associated with memory, tradition, and routine.",
+  },
+  Se: {
+    name: "Extraverted Sensing",
+    description:
+      "<b>Extraverted Sensing (Se)</b> is the cognitive function that is oriented to the present. It is focused on external sensations and taking in the world as it is. Se is often associated with spontaneity, action, and adaptability.",
+  },
+  Ni: {
+    name: "Introverted Intuition",
+    description:
+      "<b>Introverted Intuition (Ni)</b> is the cognitive function that is oriented to the future. It is focused on internal insights and conceptualizing the world as it could be. Ni is often associated with vision, imagination, and creativity.",
+  },
+  Ne: {
+    name: "Extraverted Intuition",
+    description:
+      "<b>Extraverted Intuition (Ne)</b> is the cognitive function that is oriented to the future. It is focused on external insights and conceptualizing the world as it could be. Ne is often associated with innovation, exploration, and possibility.",
+  },
+  Ti: {
+    name: "Introverted Thinking",
+    description:
+      "<b>Introverted Thinking (Ti)</b> is the cognitive function that is oriented to the past. It is focused on internal logic and understanding how things work. Ti is often associated with analysis, objectivity, and precision.",
+  },
+  Te: {
+    name: "Extraverted Thinking",
+    description:
+      "<b>Extraverted Thinking (Te)</b> is the cognitive function that is oriented to the present. It is focused on external logic and understanding how things work. Te is often associated with organization, efficiency, and leadership.",
+  },
+  Fi: {
+    name: "Introverted Feeling",
+    description:
+      "<b>Introverted Feeling (Fi)</b> is the cognitive function that is oriented to the past. It is focused on internal values and understanding what is important. Fi is often associated with authenticity, empathy, and personal growth.",
+  },
+  Fe: {
+    name: "Extraverted Feeling",
+    description:
+      "<b>Extraverted Feeling (Fe)</b> is the cognitive function that is oriented to the present. It is focused on external values and understanding what is important. Fe is often associated with harmony, compassion, and social norms.",
+  },
 };
 
 const mbtiOppositeCf = {
@@ -113,11 +145,13 @@ const mbtiOppositeJP = {
 
 // DOM nodes
 
-const $types = document.querySelector("#types");
-const $typesdesc = document.querySelector("#typesdesc");
-const $cfs = document.querySelector("#cfs");
+const $typesWrapper = document.querySelector("#types");
+const $typesDescWrapper = document.querySelector("#typesdesc");
+const $cfsWrapper = document.querySelector("#cfs");
+const $cfDescWrapper = document.querySelector("#cfdesc");
+
 const $cfsByIndex = new Array(8).fill(null);
-const $cfsDescByIndex = new Array(4).fill(null);
+const $cfsDescByIndex = new Array(8).fill(null);
 
 // Constants
 
@@ -228,48 +262,56 @@ function calculateNewTypeAfterSwap(inCf, dropIndex) {
 }
 
 function createCognFunctions() {
-  $cfs.innerHTML = "";
+  $cfsWrapper.innerHTML = "";
 
   for (let i = 0; i < 4; i++) {
-    const $func = document.createElement("div");
-    $func.setAttribute("data-position", i);
-    $func.classList.add("cfwrap");
+    const $cfWrap = document.createElement("div");
+    $cfWrap.setAttribute("data-position", i);
+    $cfWrap.classList.add("cfwrap");
 
-    const $spanwrap = document.createElement("div");
-    $spanwrap.classList.add("cfspanwrap");
+    const $cfSpanWrap = document.createElement("div");
+    $cfSpanWrap.classList.add("cfspanwrap");
 
     const $span1 = document.createElement("span");
     $span1.setAttribute("data-cf-index", i);
     $span1.classList.add("cf");
     $span1.classList.add("cfa");
     $span1.setAttribute("draggable", true);
-    $spanwrap.appendChild($span1);
+    $cfSpanWrap.appendChild($span1);
 
     const $span2 = document.createElement("span");
     $span2.setAttribute("data-cf-index", i + 4);
     $span2.classList.add("cf");
     $span2.classList.add("cfb");
     $span2.setAttribute("draggable", true);
-    $spanwrap.appendChild($span2);
+    $cfSpanWrap.appendChild($span2);
 
-    $func.appendChild($spanwrap);
+    $cfWrap.appendChild($cfSpanWrap);
 
-    const $desc = document.createElement("div");
-    $desc.classList.add("cfdesc");
+    $cfsWrapper.appendChild($cfWrap);
 
-    $func.appendChild($desc);
-
-    $cfs.appendChild($func);
+    const $cfDesc12Wrapper = document.createElement("div");
+    $cfDesc12Wrapper.classList.add("cfdesc12wrapper");
+    const $cfDesc1 = document.createElement("div");
+    $cfDesc1.classList.add("cfdesc");
+    $cfDesc1.setAttribute("data-cf-index", i);
+    const $cfDesc2 = document.createElement("div");
+    $cfDesc2.classList.add("cfdesc");
+    $cfDesc2.setAttribute("data-cf-index", i + 4);
+    $cfDesc12Wrapper.appendChild($cfDesc1);
+    $cfDesc12Wrapper.appendChild($cfDesc2);
+    $cfDescWrapper.appendChild($cfDesc12Wrapper);
 
     $cfsByIndex[i] = $span1;
     $cfsByIndex[i + 4] = $span2;
-    $cfsDescByIndex[i] = $desc;
+    $cfsDescByIndex[i] = $cfDesc1;
+    $cfsDescByIndex[i + 4] = $cfDesc2;
   }
 }
 
 function createMBTITypes() {
-  $types.innerHTML = "";
-  $typesdesc.innerHTML = "";
+  $typesWrapper.innerHTML = "";
+  $typesDescWrapper.innerHTML = "";
 
   let index = 0;
 
@@ -290,7 +332,7 @@ function createMBTITypes() {
       $letter.innerText = letter;
       $type.appendChild($letter);
     }
-    $types.appendChild($type);
+    $typesWrapper.appendChild($type);
 
     const $typedesc = document.createElement("div");
     $typedesc.setAttribute("data-type", type);
@@ -299,7 +341,7 @@ function createMBTITypes() {
       $typedesc.classList.add("active");
     }
     $typedesc.innerText = mbtiTypes[type].description;
-    $typesdesc.appendChild($typedesc);
+    $typesDescWrapper.appendChild($typedesc);
 
     index++;
   }
@@ -331,23 +373,23 @@ function renderInfiniteScroll() {
 
   if (!$nextType) {
     for (let i = 0; i < INFINITE_SCROLL_DEPTH; i++) {
-      const $typeAt = $types.children[0];
+      const $typeAt = $typesWrapper.children[0];
       const $clone = $typeAt.cloneNode(true);
-      $types.appendChild($clone);
-      $types.removeChild($typeAt);
+      $typesWrapper.appendChild($clone);
+      $typesWrapper.removeChild($typeAt);
     }
   }
   if (!$prevType) {
     for (let i = 0; i < INFINITE_SCROLL_DEPTH; i++) {
-      const $typeAt = $types.children[$types.children.length - 1];
+      const $typeAt = $typesWrapper.children[$typesWrapper.children.length - 1];
       const $clone = $typeAt.cloneNode(true);
-      $types.prepend($clone);
-      $types.removeChild($typeAt);
+      $typesWrapper.prepend($clone);
+      $typesWrapper.removeChild($typeAt);
     }
   }
 
   // Reset data-index of every children
-  Array.from($types.children).forEach(($children, index) => {
+  Array.from($typesWrapper.children).forEach(($children, index) => {
     $children.setAttribute("data-index", index);
   });
 }
@@ -380,7 +422,7 @@ function changeActiveType(nextType, forced = false) {
   const oldIndex = $activeType.dataset.index;
 
   // Move y of $types to show active type
-  $types.animate(
+  $typesWrapper.animate(
     {
       translate: [
         `0 ${-$activeType.offsetTop}px`,
@@ -432,10 +474,7 @@ function changeActiveType(nextType, forced = false) {
   mbtiTypes[nextType].functions.forEach((text, index) => {
     $cfsByIndex[index].innerText = text;
     $cfsByIndex[index].setAttribute("data-cf", text);
-
-    if (index <= 3) {
-      $cfsDescByIndex[index].innerText = cognFuncNames[text];
-    }
+    $cfsDescByIndex[index].innerHTML = cognFuncs[text].description;
   });
 }
 
@@ -464,7 +503,7 @@ function throttle(fn) {
 
 document.body.addEventListener("mousewheel", throttle(onMouseWheel));
 
-$types.addEventListener("click", (e) => {
+$typesWrapper.addEventListener("click", (e) => {
   let $parent = e.target;
   while (!$parent.dataset.type) {
     $parent = $parent.parentElement;
@@ -508,20 +547,34 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
-$cfs.addEventListener("dragstart", (e) => {
+$cfsWrapper.addEventListener("mouseover", (e) => {
+  console.log("e.target :>> ", e);
+  const cfIndex = e.target.dataset.cfIndex;
+  console.log("cfIndex :>> ", cfIndex);
+  if (cfIndex === undefined) return;
+  $cfsDescByIndex[cfIndex].classList.add("active");
+});
+
+$cfsWrapper.addEventListener("mouseout", (e) => {
+  const $active = document.querySelector(".cfdesc.active");
+  if (!$active) return;
+  $active.classList.remove("active");
+});
+
+$cfsWrapper.addEventListener("dragstart", (e) => {
   e.target.classList.add("dragging");
 
   const incomingCf = e.target.dataset.cf;
   e.dataTransfer.effectAllowed = "move";
   e.dataTransfer.setData("text/plain", incomingCf);
 
-  $cfs.querySelectorAll(`[draggable]`).forEach(($scf) => {
+  $cfsWrapper.querySelectorAll(`[draggable]`).forEach(($scf) => {
     if ($scf === e.target) return;
     $scf.classList.add("droppable");
   });
 });
 
-$cfs.addEventListener("dragend", (e) => {
+$cfsWrapper.addEventListener("dragend", (e) => {
   e.target.classList.remove("dragging");
   document.querySelectorAll("[draggable]").forEach(($scf) => {
     $scf.classList.remove("droppable");
@@ -529,21 +582,21 @@ $cfs.addEventListener("dragend", (e) => {
   });
 });
 
-$cfs.addEventListener("dragenter", (e) => {
+$cfsWrapper.addEventListener("dragenter", (e) => {
   if (!e.target.classList.contains("droppable")) return;
   e.target.classList.add("over");
 });
 
-$cfs.addEventListener("dragleave", (e) => {
+$cfsWrapper.addEventListener("dragleave", (e) => {
   if (!e.target.classList.contains("droppable")) return;
   e.target.classList.remove("over");
 });
 
-$cfs.addEventListener("dragover", (e) => {
+$cfsWrapper.addEventListener("dragover", (e) => {
   e.preventDefault();
 });
 
-$cfs.addEventListener("drop", (e) => {
+$cfsWrapper.addEventListener("drop", (e) => {
   e.stopPropagation();
   if (!e.target.classList.contains("droppable")) return;
 
