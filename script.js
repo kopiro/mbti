@@ -83,6 +83,17 @@ const mbtiTypes = {
   },
 };
 
+const cognFuncsStackNames = [
+  "Dominant",
+  "Auxiliary",
+  "Tertiary",
+  "Inferior",
+  "Opposing",
+  "Critical Parent",
+  "Trickster",
+  "Demon",
+];
+
 const cognFuncs = {
   Si: {
     name: "Introverted Sensing",
@@ -271,23 +282,19 @@ function createCognFunctions() {
 
     const $cfSpanWrap = document.createElement("div");
     $cfSpanWrap.classList.add("cfspanwrap");
-
     const $span1 = document.createElement("span");
     $span1.setAttribute("data-cf-index", i);
     $span1.classList.add("cf");
     $span1.classList.add("cfa");
     $span1.setAttribute("draggable", true);
     $cfSpanWrap.appendChild($span1);
-
     const $span2 = document.createElement("span");
     $span2.setAttribute("data-cf-index", i + 4);
     $span2.classList.add("cf");
     $span2.classList.add("cfb");
     $span2.setAttribute("draggable", true);
     $cfSpanWrap.appendChild($span2);
-
     $cfWrap.appendChild($cfSpanWrap);
-
     $cfsWrapper.appendChild($cfWrap);
 
     const $cfDesc12Wrapper = document.createElement("div");
@@ -394,6 +401,12 @@ function renderInfiniteScroll() {
   });
 }
 
+function getOrdinal(n) {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
 function changeActiveType(nextType, forced = false) {
   let $nextType = getNodeTypeFromString(nextType);
   if (!$nextType) {
@@ -474,7 +487,9 @@ function changeActiveType(nextType, forced = false) {
   mbtiTypes[nextType].functions.forEach((text, index) => {
     $cfsByIndex[index].innerText = text;
     $cfsByIndex[index].setAttribute("data-cf", text);
-    $cfsDescByIndex[index].innerHTML = cognFuncs[text].description;
+    $cfsDescByIndex[index].innerHTML = `<h3>(${getOrdinal(index + 1)}) ${
+      cognFuncsStackNames[index]
+    }</h3><p>${cognFuncs[text].description}</p>`;
   });
 }
 
@@ -548,9 +563,7 @@ window.addEventListener("keydown", (e) => {
 });
 
 $cfsWrapper.addEventListener("mouseover", (e) => {
-  console.log("e.target :>> ", e);
   const cfIndex = e.target.dataset.cfIndex;
-  console.log("cfIndex :>> ", cfIndex);
   if (cfIndex === undefined) return;
   $cfsDescByIndex[cfIndex].classList.add("active");
 });
